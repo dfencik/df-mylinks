@@ -13,6 +13,14 @@
 <Type>%String</Type>
 </Property>
 
+<Property name="SongTimeTime">
+<Type>%Time</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode>	s {*}=##class(%Library.Time).DisplayToLogical({SongTime})
+	q</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
 <Property name="SongURL">
 <Type>%String</Type>
 <Parameter name="MAXLEN" value="500"/>
@@ -47,7 +55,6 @@
 	s SongName=$replace(SongName,"^","&")
 	s SongUrl=##class(%CSP.Page).UnescapeURL(SongUrl)
 	s SongUrl=$replace(SongUrl,"^","&")
-	k ^ISdusan
 	try{
 		s sc=1
 		for i=1:1:$l(SongTime,"~")	
@@ -77,7 +84,6 @@
 	catch ex
 	{
 		s sc=0
-		s ^ISdusan=ex.DisplayString()
 	}
 	q sc
 ]]></Implementation>
@@ -114,6 +120,9 @@
 </Value>
 <Value name="6">
 <Value>Datum</Value>
+</Value>
+<Value name="7">
+<Value>SongTimeTime</Value>
 </Value>
 </Data>
 </Storage>
