@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<CSP name="css/style.css" application="/csp/df/" default="1"><![CDATA[
+html { height: 100%}
+body { margin: 0px; padding: 0px; height: 100%; font: 11px Arial, Helvetica, sans-serif}
+table td{font: 11px Arial, Helvetica, sans-serif}
+
+tr#header { height: 69px; background-color: #FFFFFF}
+tr#body {}
+tr#footer { background-color: #E1F1FF; height: 23px;}
+tr#footer td { border: 2px solid #004B8D; }
+tr#footer .text{ padding: 0px 10px 0px 11px; color: #004B8D}
+tr#footer .textPrint{ display: none}
+
+/* popup help */
+.bgHead {background-color: #FFFFFF; border-bottom: 3px solid #F37421; }
+.headline { font-weight: bold}
+
+/* header info */
+td#headerRight {color: #004B8D;}
+td#headerRight .top{ padding: 8px 14px 0px 10px}
+td#headerRight .bottom{ padding: 0px 14px 3px 10px; font: normal 11px Verdana, Arial, Helvetica, sans-serif}
+td#headerRight table td{ text-align: right; color: #004B8D; font-size: 10px;}
+td#headerRight span.messageBoard{ color: #F37421}
+td#headerRight span.blue{ color: #9CA3C8}
+td#headerRight a:link, td#headerRight a:active, td#headerRight a:visited{ color: #004B8D; text-decoration: none; font-size: 12px; font-weight: bold}
+td#headerRight a:hover{ color: #004B8D; text-decoration: underline; font-size: 12px; font-weight: bold}
+td#headerRight td.bottom a:link, td#headerRight td.bottom a:active, td#headerRight td.bottom a:visited{ color: #004B8D; text-decoration: none; font-size: 11px; font-weight: bold}
+td#headerRight td.bottom a:hover{ color: #004B8D; text-decoration: underline; font-size: 11px; font-weight: bold}
+
+/* section name */
+tr.sectionBlue td { background-color: #FEF2EB; height: 40px; border-top: 3px solid #F37421; border-bottom: 3px solid #F37421;}
+tr.sectionBlue td.menu { width: 165px; border-left: 3px solid #F37421;}
+tr.sectionBlue td.line { width: 1px; font-size: 1px}
+tr.sectionBlue td.sectionName { color: #F37421; font-size: 22px; border: 0px solid black;}
+tr.sectionBlue td.lastcell { border-right: 3px solid #F37421;}
+
+tr.sectionRed td { background-color: #FEF2EB; height: 40px; border-top: 3px solid #F37421; border-bottom: 3px solid #F37421;}
+tr.sectionRed td.menu { width: 165px; border-left: 3px solid #F37421;}
+tr.sectionRed td.line { width: 1px; font-size: 1px}
+tr.sectionRed td.sectionName { color: #F37421; font-size: 22px; border: 0px solid black;}
+tr.sectionRed td.lastcell { border-right: 3px solid #F37421;}
+
+tr.sectionGreen td { background-color: #FEF2EB; height: 40px; border-top: 3px solid #F37421; border-bottom: 3px solid #F37421;}
+tr.sectionGreen td.menu { width: 165px; border-left: 3px solid #F37421;}
+tr.sectionGreen td.line { width: 1px; font-size: 1px}
+tr.sectionGreen td.sectionName { color: #F37421; font-size: 22px; border: 0px solid black;}
+tr.sectionGreen td.lastcell { border-right: 3px solid #F37421;}
+
+/* menu */
+tr#center td.menu { width: 165px;}
+tr#center div.menu { margin: 25px 0px 0px 12px; width: 153px; overflow: hidden;}
+tr#center div.menu .item{ margin: 6px 0px 0px 0px; color: #004B8D; font-weight: bold; font-size: 13px; clear: both; overflow: auto}
+tr#center div.menu .item .bullet{ float: left; border: 0px solid black; display: inline; width: 10px; color: #F37421}
+tr#center div.menu .item div.menuText{ width: 137px; border: 0px solid black; margin: 0 0 0px 2px; display: inline}
+
+tr#center div.subMenu { margin: 8px 0px 10px 12px}
+tr#center div.subMenu .item{ margin: 4px 2px 0px 0px}
+
+/* menu and submenu links */
+
+div.menu div.item a:link,div.menu div.item a:active,div.menu div.item a:visited { color: #004B8D; font-weight: bold; font-size: 13px; text-decoration: none}
+div.menu div.item a:hover { color: #004B8D; font-weight: bold; font-size: 13px; text-decoration: underline}
+
+div.menu div.item a.unselected:link,div.menu div.item a.unselected:active,div.menu div.item a.unselected:visited { color: #004B8D; font-weight: bold; font-size: 13px; text-decoration: none}
+div.menu div.item a.unselected:hover { color: #004B8D; font-weight: bold; font-size: 13px; text-decoration: underline}
+
+div.menu div.item a.selected:link,div.menu div.item a.selected:active,div.menu div.item a.selected:visited { color: #F37421; font-weight: bold; font-size: 13px; text-decoration: none}
+div.menu div.item a.selected:hover { color: #F37421; font-weight: bold; font-size: 13px; text-decoration: underline}
+
+div.subMenu .item a.unselected:link,div.subMenu .item a.unselected:active,div.subMenu .item a.unselected:visited { color: #004B8D; font-weight: normal ! important; font-size: 12px; text-decoration: none}
+div.subMenu .item a.unselected:hover { color: #004B8D; font-weight: normal; font-size: 12px; text-decoration: underline}
+
+div.subMenu .item a.selected:link,div#subMenu .item a.selected:active,div.subMenu .item a.selected:visited { color: #F37421; font-weight: bold; font-size: 12px; text-decoration: none}
+div.subMenu .item a.selected:hover { color: #F37421; font-weight: bold; font-size: 12px; text-decoration: underline}
+
+/* line between menu and content */
+
+tr#center td.line { font-size: 1px; height:100%}
+tr#center td.line div.lineBg{ margin: 10px 0px 0px 0px; background-color: #DDE6F6; width: 1px; height: 100%}
+tr#center td.line .blankBottom{ width: 1px; height: 10px; background-color: #FFFFFF; position: absolute; bottom: 0px}
+
+/* content */
+
+tr#center td.content { padding: 25px 14px 3px 9px; color: #004B8D}
+tr#center td.content td{ color: #004B8D}
+tr#center table.blue td { color: #004B8D}
+tr#center td.todaysdate { padding: 26px 14px 0px 0px; color: #004B8D}
+
+
+/* news */
+
+tr#center td.news { width: 168px; background-color: #E0E0E0; color: #505050}
+tr#center>div { width: 168px}
+tr#center td.news div.article{ font-size: 11px; font-weight: bold; margin: 0px 0px 10px 0px}
+tr#center div.news { margin: 15px 13px 15px 13px}
+tr#center div.newsDate { margin: 11px 0px 0px 0px}
+tr#center div.newsName { margin: 0px 0px 0px 0px}
+tr#center div.newsText { margin: 0px 0px 0px 0px}
+tr#center div.all { margin: 15px 0px 0px 0px}
+tr#blankSeparator { height: 10px ! important}
+tr#blankSeparator td{ font-size: 1px}
+tr#blankSeparator td.news{ font-size: 1px; background-color: #E0E0E0}
+
+/* news links */
+
+tr#center div.news a:link, a:active, a:visited { font-weight: bold; text-decoration: none; color: #505050}
+tr#center div.news a:hover { text-decoration: underline; color: #505050 }
+
+/* form elements */
+.caption { font-weight: bold; font-size: 12px; color: #004B8D;}
+.textbox30 { width: 30px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.textbox35 { width: 35px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.textbox60 { width: 60px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.textbox90 { width: 90px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; padding: 2px; font: normal 11px Arial, Helvetica, sans-serif}
+.textbox130 { width: 130px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; padding: 2px; font: normal 11px Arial, Helvetica, sans-serif}
+.textbox180 { width: 180px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.textbox220 { width: 220px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.textbox270 { width: 270px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.textbox430 { width: 430px; height: 19px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.textboxml { width: 100%; height: 76px; margin: 0px 0px 0px 0px; border: 1px solid #7F9DB9; font: normal 11px Arial, Helvetica, sans-serif; padding: 2px;}
+.dropdown {  height: 19px; border: 1px solid #7F9DB9; font: normal 11px Arial; margin: 0px 0px 0px 0px; display: inline}
+.dropdown55{ width: 55px;  height: 19px; border: 1px solid #7F9DB9; font: normal 11px Arial; margin: 0px 0px 0px 0px}
+.dropdown80{ width: 80px;  height: 19px; border: 1px solid #7F9DB9; font: normal 11px Arial; margin: 0px 0px 0px 0px}
+.dropdown180{ width: 250px;  height: 19px; border: 1px solid #7F9DB9; font: normal 11px Arial; margin: 0px 0px 0px 0px}
+.dropdown270{ width: 270px;  height: 19px; border: 1px solid #7F9DB9; font: normal 11px Arial; margin: 0px 0px 0px 0px}
+table.email td{ margin: 0; padding: 0 ! important;}
+.nopadding td,.nopadding th{ padding: 0px ! important}
+td.nopadding { padding: 0px ! important}
+.disabled { color: #808080; background: #FFFFFF}
+.readonly { color: #808080; background: #FFFFFF}
+
+a.linkButton:link, a.linkButton:visited, a.linkButton:active, a.linkButton:hover  { background-color:#101F7A; padding: 2px 10px 2px 10px; height:14px; color:#ffffff; text-decoration: none; cursor: pointer; font: normal 11px Verdana, Arial, Helvetica, sans-serif;}
+
+
+/* tables */
+table.padding { border-spacing: 0px; border-collapse: collapse; width: 100%; font: 11px Arial, Helvetica, sans-serif; clear: both}
+table.padding input{ font: 11px Arial, Helvetica, sans-serif;}
+table.padding th { padding: 1px 1px 1px 9px; vertical-align: top; border-top: 2px solid #004B8D; border-bottom: 2px solid #004B8D;}
+table.padding th.first { border-left: 2px solid #004B8D;}
+table.padding th.last { border-right: 2px solid #004B8D;}
+table.padding td { padding: 3px 3px 3px 9px; vertical-align: top}
+td.nopadding2 {padding: 0px 0 0 0px !important;}
+table.padding img { border: 0 px solid red; margin: 0px; vertical-align: middle}
+.textLeft { text-align: left}
+.textRight { text-align: right}
+th { font-weight: bold; font-size: 11px; background-color: #E1F1FF; color: #004B8D; text-align: left;}
+tr.line1 { background-color: #EFF6FB;}
+tr.line1 td{ color: #004B8D; border-left: 0px solid #004B8D; border-right: 0px solid #004B8D;}
+tr.line2 { background-color: #FFFFFF;}
+tr.line2 td{ color: #004B8D; border-left: 0px solid #004B8D; border-right: 0px solid #004B8D;}
+tr.selectedClass { background-color: #B2C4DB}
+tr.overClass { background-color: #E2F0FD}
+tr.hide { display: none}
+
+td.line1 { background-color: #EFF6FB;}
+td.line2 { background-color: #FFFFFF;}
+
+/* floating */
+
+div.left { float: left}
+div.right { float: right}
+
+/* table caption */
+div.tableCaption { font-weight: bold; font-size: 12px; color: #004B8D; margin: 0px 0px 8px 0px;}
+
+/* table groups  */
+input.group_text { background-color: #E1F1FF; font: bold 11px Arial, Helvetica, sans-serif; border: 0px solid #004B8D; color: #004B8D; text-align: right} 
+div.groupButton { color: #004B8D}
+
+/* texty pred prihlasenim */
+
+span#DView_spName { font-weight: bold; font-size: 22px;}
+h2 { font: normal 18px}
+
+/*linky tlac a pomoc */
+div.links { margin: 20px 0 10px 0}
+div.links div { margin: 0px 0 8px 0/*; margin: 0px 0 3px 0*/}
+
+/* other */
+
+.left { float: left }
+.right { float: right}
+.bold { font-weight: bold}
+.hidden { display: none}
+.green { color: #00CC00}
+.black { color: #000000}
+.red { color: #F43724}
+tr#blankSeparator { height: 17px}
+.marginTop5 { margin: 3px 0 0 0; padding: 0px}
+
+
+/* global links */
+a:link,a:active,a:visited,a:hover {color: #004B8D; font-weight: normal; text-decoration: underline}
+
+/* sign on info */
+h1 {font-weight: bold; font-size: 15px; color: #00703C; font-family: Arial, Helvetica, "Helvetica CE", sans-serif;}
+h2 {font-weight: bold; font-size: 13px; color: #00703C; font-family: Arial, Helvetica, "Helvetica CE", sans-serif;}
+h3 {font-weight: bold; font-size: 12px; color: #00703C; font-family: Arial, Helvetica, "Helvetica CE", sans-serif;}
+.soi {font: 11px Arial, Helvetica, sans-serif;}
+
+#soi li { list-style-image:url(../Img/bullet.gif); font: 11px Arial, Helvetica, sans-serif;}
+.soinone {list-style-type: none; padding: 0 10px; margin: 0; font: 11px Arial, Helvetica, sans-serif;}
+
+/* ul extended */
+
+#ulex li { padding-bottom: 5px; font: 11px Arial, Helvetica, sans-serif; }
+
+.star { font: 10px Arial, Helvetica, sans-serif; }
+
+#outer {overflow: hidden; position: relative;}
+#outer[id] {display: table; position: static;}
+
+#middle {position: absolute; top: 50%;} /* for explorer only*/
+#middle[id] {display: table-cell; vertical-align: middle; position: static;}
+
+#inner {position: relative; top: -50%} /* for explorer only */
+/* optional: #inner[id] {position: static;} */
+
+.normtext { font: 11px Arial, Helvetica, sans-serif; }
+.smalltext { font: 10px Arial, Helvetica, sans-serif; }
+.largetext { font: 13px Arial, Helvetica, sans-serif; }
+.exlrgtext { font: 16px Arial, Helvetica, sans-serif; }
+
+.slink a:link, .slink a:active, .slink a:visited{ color: #004B8D; text-decoration: none; font-size: 12px; font-weight: bold}
+.slink a:hover{ color: #004B8D; text-decoration: underline; font-size: 12px; font-weight: bold}
+]]></CSP>
+</Export>
