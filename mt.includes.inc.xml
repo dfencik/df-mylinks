@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="mt.includes" type="INC"><![CDATA[
+#define OnlyFileName(%val) $p($tr(%val,"/","\"),"\",$l(%val,"\"))
+#define %File   ##class(%File)
+#define %WEBUtil		##class(WEB.Util)
+ ;write to log String
+ ;#define writeLog(%errorLog,%txt)   
+#define writeLog(%errorLog,%txt)   s %errorLog=%errorLog_$zdt($h,4)_" - "_%txt_$c(13,10)
+#define writeDecomposedErrorToLog(%errorLog,%sc) $$$writeLog(%errorLog,$j(" ",10)_$$$%WEBUtil.DecomposeError(%sc))
+ ;ret: path only 
+#define HFSPathName(%filespec)          $$$%File.GetDirectory(%filespec) 
+#define HFSPathAppend(%path,%subdir)    $$$%File.SubDirectoryName(%path,%subdir) 
+ 
+ 
+ ;ret: filename only 
+#define HFSFileName(%filespec)          $$$%File.GetFilename(%filespec)
+#define HFSNormalize(%filespec)         $$$%File.NormalizeFilename(%filespec) 
+#define HFSNREFFScriptName(%filespec)   $p($$$%File.GetFilename(%filespec),"?") 
+ ;ret: true: success 
+#define HFSPathExists(%path)            $$$%File.DirectoryExists(%path) 
+#define HFSmkdir(%path,%newdir)         $$$%File.CreateNewDir(%path,%newdir) 
+#define HFSmkdirpath(%path)             $$$%File.CreateDirectoryChain(%path) 
+#define HFSrmdir(%path)                 $$$%File.RemoveDirectory(%path) 
+ 
+ 
+ ;ret: true: success 
+#define HFSFileExists(%path,%file)              $$$%File.Exists(%path_%file) 
+#define HFSFileExists2(%file)              		$$$%File.Exists(%file) 
+#define HFSFileDelete(%path,%file)              $$$%File.Delete(%path_%file) 
+ ; 
+#define HFSFileGetSize(%path,%file)             $$$%File.GetFileSize(%path_%file) 
+#define HFSFileGetDateCreated(%path,%file)      $$$%File.GetFileDateCreated(%path_%file) 
+#define HFSFileGetDateModified(%path,%file)     $$$%File.GetFileDateModified(%path_%file) 
+ 
+ 
+ ;ret: true: success 
+#define HFSFileRename(%path,%file1,%file2)              $$$%File.Rename(%path_%file1,%path_%file2) 
+#define HFSFileCopy(%path1,%file1,%path2,%file2)        $$$%File.CopyFile(%path1_%file1,%path2_%file2) 
+
+ 
+#define CACHE2007UP
+	// or: #define CACHE2007 to enable the new syntax
+ 
+#ifdef CACHE2007UP
+	
+#define TRY			try {
+#define CATCH		} catch ex {
+#define YRT			}
+	
+#else
+ 
+#define TRY			set $zt="catch"
+#define CATCH		quit tSC	##continue
+catch	set $zt="" ##continue
+	d:'($ze["ZMTXE") BACK^%ETN
+#define YRT
+	
+#endif
+
+]]></Routine>
+</Export>

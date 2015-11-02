@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="dfMain" type="MAC" languagemode="0"><![CDATA[
+start
+	k
+	s file=$zsearch("d:\!e4np\*.mp3")
+	w "start",!
+	while file'="" {
+       s ff=##class(%File).GetFilename(file)
+       i ##class(%File).Exists("d:\!e4np_test\"_ff)
+       {
+       		w ##class(%File).CopyFile(file,"d:\!e4np_test\"_ff,1),!
+       		s found=$i(found)
+       }
+       s file=$ZSEARCH("")
+   }
+   w !!,found
+   q
+
+	
+]]></Routine>
+</Export>
