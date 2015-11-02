@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.ui.Ciselniky">
+<Super>WEB.Base.CSPPage</Super>
+<TimeCreated>62532,30972.19392</TimeCreated>
+
+<Parameter name="TABLEWIDTH">
+<Default>900</Default>
+</Parameter>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PAGETITLE">
+<Default>Číselníky</Default>
+</Parameter>
+
+<Method name="DrawPageContent">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	#dim rs as %ResultSet
+	#dim col,style,a,cols,totalCols,s,cis,strSQL,txt,ret,trNo,recno,recno2,parentId,datum=""
+	#dim sc=$$$OK
+	#dim ex as %Exception.AbstractException
+	try
+	{
+		s totalCols="8"
+		&html<
+		<div class="dialog"></div>
+		<table cellpadding="1" cellspacing="1" border="0" style="width:#(..#TABLEWIDTH)#px;">
+		 <caption style="font-family: Arial, Helvetica, sans-serif;font-size: 1.2em;text-decoration: none;font-style: normal;">Číselníky<div style="float:right"><a class="aiban" href="javascript:void(0);">IBANgen</a></div></caption>
+		  <tbody>>
+		s cis("1~DF_Private_Cis.Banky")="Kod,Nazov,Platny"
+		s cis("0~DF_Private_Cis.Partneri")="MenoPartnera,CisloUctu,Banka->Kod Banka,KonstantnySymbol->Kod KonstantnySymbol,VariabilnySymbol,SpecifickySymbol,Suma,PlatiDo,Poznamka,Platny"
+		s cis("2~DF_Private_Cis.kSymboly")="Kod,Nazov,Platny"
+		s s=""
+		f
+		{
+			s s=$o(cis(s))
+			q:s=""
+			;<input type="hidden" value="#($p(s,"~",2))#" /><a class="addNewCis" style="float:right;" href="javascript:void(0);">pridať</a>
+			&html<
+			 <tr class="#($p(s,"~",2))#">
+			  <td class="grpSeparator">
+			   <a class="grpName" href="javascript:void(0)" style="text-decoration: none; cursor: pointer;" title="#($p(s,"~",2))#">#($p(s,".",2))#</a>
+			   <span style="float:left;padding-left:10px;">&nbsp;</span>
+			   <span style="float:right;"><input type="hidden" value="#(cis(s))#" /><input type="hidden" value="#($p(s,"~",2))#" /><a style="border:none;" class="addNewCis" href="javascript:void(0);"><img class="actionImg new" title="Nový záznam" src="pic/new_folder.png" /></a></span>
+			  </td>
+			 </tr>
+			 <tr class="next">
+			  <td style="display:none;width:#(..#TABLEWIDTH-15)#;text-align:right;padding:0;">>
+				s cols=cis(s)
+				s strSQL="SELECT ID id,"_cols_" FROM "_$p(s,"~",2)
+				s strSQL=strSQL_" ORDER BY Platny DESC"
+				s rs=##class(%ResultSet).%New()
+				s rs.RuntimeMode=2
+				$$$THROWONERROR(sc,rs.Prepare(strSQL))
+				$$$THROWONERROR(sc,rs.Execute())
+				&html<<table style="border:none;">>
+				&html<<tr class="header"><td style="border:none;border-right:1px dotted lightgray;">&nbsp;</td>>
+				f a=2:1:rs.GetColumnCount()
+				{
+					s style=$s(a<rs.GetColumnCount():"style=""border-top:1px dotted lightgray;border-right:1px dotted lightgray;""",1:"style=""border-top:1px dotted lightgray;""")
+					&html<<td #(style)#>#(rs.GetColumnHeader(a))#</td>>		
+				}
+				&html<<td style="border-top:1px dotted lightgray;border-right:1px dotted lightgray;">&nbsp;</td></tr>>
+				while rs.Next()
+				{
+					s recno=$i(recno)
+					s thr=""
+					i rs.Data("Platny")'=1
+					{
+						s thr="text-decoration: line-through;color:silver;"
+					}
+					&html<<tr class="#($s(recno#2=0:"even",1:"odd"))#">
+						<td style="width:15px;background:#FBFBF8;border:none;border-right:1px dotted lightgray;"><input type="hidden" value="#(rs.Data("id"))#" />&nbsp;</td>>
+					f a=1:1:$l(cols,",")
+					{
+						s col=$p(cols,",",a)
+						i $p(col," ",2)'="" s col=$p(col," ",2)
+						s style=$s(a<$l(cols,","):"style="""_thr_"border-right:1px dotted lightgray;""",1:"")
+						&html<<td #(style)#>>
+							i a=1
+							{
+								w "<a style=""border:none;"_thr_""" href=""javascript:void(0);"" onclick=""editRecord('"_rs.Data("id")_"','"_$p(s,"~",2)_"','"_$replace(cols,",","~")_"');"">"_rs.Data(col)_"</a>"
+							}
+							else
+							{
+									if col="Platny"
+									{
+										i rs.Data(col)=1
+										{
+											&html<<img style="width:15px;height:15px" src="pic/ok.png" />>
+										}
+										else
+										{
+											&html<<img style="width:15px;height:15px" src="pic/no.png" />>
+										}
+									}
+									else
+									{
+										w rs.Data(col)
+										
+									}
+							}
+							&html<</td>>		
+					
+					}
+					&html<<td style="border-right:1px dotted lightgray;">&nbsp;</td></tr>>
+				}
+				;&html<<tr class="header"><td colspan="#($l(cols,",")+2)#">&nbsp;</td></tr>>
+			&html<</table></td></tr>>
+		}
+		k rs
+	}
+	catch ex
+	{
+		&html<<tr><td colspan="10">#(..noRows(ex.DisplayString()))#</td></tr>>
+	}
+	&html<</tbody></table>>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="DrawHeadJavascripts">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	&html<
+	<script type="text/javascript" language="javascript" src="js/iban.js"></script>
+	<script type="text/javascript" language="javascript">
+	var $a="<a href=\"javascript:void(0);\" style=\"text-decoration: none; cursor: pointer;\">pridať</a>"
+	$(document).ready(function(){
+		$.fn.getContent=function(obj)
+		{
+			var parentId=obj.getAttribute("parentId");
+			var method=obj.getAttribute("method");
+			var objId=obj.getAttribute("objId");
+			var cols=obj.getAttribute("cols");
+			if(typeof parentId == "undefined") parentId="";
+			if(typeof objId == "undefined") objId="";
+			if(typeof method == "undefined") method="";
+			if(typeof cols == "undefined") cols="";
+			var linka=#server(..Link("DF.Private.ui.DialogContent.cls?parentId="+parentId+"&objId="+objId+"&method="+method+"&cols="+cols))#;
+			$.get(linka, function(data) {$(obj).html(data)});
+			return;
+		}
+		$dialog=$(".dialog");
+		$dialog.dialog({
+			title: "Pridať úhradu",
+			autoOpen: false,
+			height: 450,
+			width: 550,
+			modal: true,
+			objId: null,
+			parentId: null,
+			cols:null,
+			open: function(){
+				$('.ui-state-default').css('float','right');
+				$(this).html('');
+				$(this).getContent(this);},
+			overlay: { backgroundColor: '#000', opacity: 0.5 },			
+			buttons: { "Zavri":  function() { $(this).dialog("close");},
+					   "Ulož":  function() { saveDialog($(this),'1');},
+					   "Vymaž":  function() { saveDialog($(this),'-1');}
+				}
+			});
+
+		//skryvanie - /odkryvanie
+		var $a=$(".grpName");
+		$a
+		  .unbind('click')
+		  .bind('click',function(){
+			  var $parent=$(this).parents("tr");
+			  if($parent.next("tr").hasClass("next"))
+			  {
+			  	$parent.next(".next").children("td").toggle();
+			  }
+			  else
+			  {
+			  var trCls=$parent.attr("className");
+			  	$("." + trCls).not($parent).toggle();
+			  }
+			  });
+		
+		//novy zaznam
+		$a=$(".addNewCis");
+		$a
+		  .unbind('click')
+		  .bind('click',function(){
+			  	var cisId=$(this).prev("input[type='hidden']").val();
+			  	var cols=$(this).prev("input[type='hidden']").prev("input[type='hidden']").val();
+			  	$dialog.attr({'objId':'','parentId':cisId,'cols':cols,'method':'cisUpdate'});
+				$dialog.dialog('option','title','Nový záznam');
+				$dialog.dialog('open');
+			  });
+		
+		//iban kalkulacka
+		var $a=$("a.aiban")
+		{
+			$a
+			  .unbind('click')
+		  	  .bind('click',function(){
+			  	  
+				  	$dialog.attr({'objId':'','parentId':'','zaplatene':'1','method':'dlgIBANcontent'});
+					$dialog.dialog('option','title','IBAN kalkulačka');
+					$dialog.dialog('option','buttons',{ "Zavri":  function() { $(this).dialog("close");}});
+					$dialog.dialog('open');
+			  		return;
+			  });
+				
+		}
+		
+		//export
+		$a=$(".doExport");
+		$a
+		  .unbind('click')
+		  .bind('click',function(){
+			  alert('exportneme')
+			  });
+		});
+
+	function showCalendar(toElement)
+	{
+		var	$datepicker=$("#datepicker");
+		$datepicker.datepicker({ altField: toElement,altFormat: "dd.mm.yy" });
+		$datepicker.datepicker("show");
+		return;
+	}
+
+	function editRecord(id,cis,cols)	
+	{
+		$dialog.attr({'objId':id,'parentId':cis,cols:cols,'method':'cisUpdate'});
+		$dialog.dialog('option','title','Úprava záznamu [\''+id+'\']');
+		$dialog.dialog('open');
+		return;
+	}
+	
+	function setItems(pId)
+	{
+		var ret=#server(..getPartner(pId))#;
+			$("#tUcet").val(ret.split('~')[0]);
+			$("#tKSymbol").val(ret.split('~')[1]);
+			$("#tVSymbol").val(ret.split('~')[2]);
+			$("#tSSymbol").val(ret.split('~')[3]);
+			$("#tSuma").val(ret.split('~')[4]);
+			$("#tPoznamka").val(ret.split('~')[5]);
+			$("#tPlatiDo").val(ret.split('~')[6]);
+		return
+	}
+	
+	function saveDialog($dlg,action)
+	{
+		var id=$dlg.attr('objId');
+		var cis=$dlg.attr('parentId');
+		if(action=='-1' && id=='') return;
+		if(action=='-1' && id!='')
+		{
+			if(!confirm('Vymazať záznam \''+ id +'\'')) return;
+		}
+		var cols=$("#colsToSave").val();
+		var ret="";
+		var tCols=cols.split("~")
+		$.each(tCols,function(key, value){
+			var col=value.split("^")[0];
+			if($("#t"+col).attr("type")=='checkbox')
+			{
+				if($("#t"+col).is(":checked"))
+				{
+					ret += '1' + ((key+1)<cols.length ? "~" :"");
+				}
+				else
+				{
+					ret += '0' + ((key+1)<cols.length ? "~" :"");
+				}
+			}
+			else
+			{
+				ret += $("#t"+col).val() + ((key+1)<cols.length ? "~" :"");
+			}
+		})
+		var ret=#server(DF.Private.ui.DialogContent.saveCisData(id,cis,cols,ret,action))#;
+		if(ret!=1)
+		{
+			alert(ret)
+		}
+		else
+		{
+			$dlg.dialog("close");
+			location.reload();
+		}
+		return;
+	}
+	</script>
+	>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="getPartner">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim obj as DF.Private.Cis.Partneri
+	#dim ret=""
+	s obj=##class(DF.Private.Cis.Partneri).%OpenId(id)
+	s ret=	obj.UcetCely_"~"_
+			obj.KonstantnySymbol.%Id()_"~"_
+	        obj.VariabilnySymbol_"~"_
+	        obj.SpecifickySymbol_"~"_
+	        obj.Suma_"~"_
+	        obj.Poznamka_"~"_
+	        obj.PlatiDoLogicalToDisplay(obj.PlatiDo)
+	q ret
+]]></Implementation>
+</Method>
+</Class>
+</Export>

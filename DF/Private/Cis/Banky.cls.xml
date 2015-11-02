@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Cis.Banky">
+<Super>%Persistent,DF.Private.Cis.Base.Spolocne</Super>
+<TimeCreated>62530,35188.452808</TimeCreated>
+
+<Method name="read">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	#dim line
+	d ..%KillExtent()
+	s file=##class(%FileCharacterStream).%New()
+	s file.Filename="c:\!\VUB\banky.txt"
+	while 'file.AtEnd
+	{
+		s line=file.ReadLine()
+		s obj=..%New()
+		s obj.Kod=$$Trim^FUNC($e(line,1,4))
+		s obj.Nazov=$$Trim^FUNC($e(line,5,*))
+		d obj.%Save()
+		k obj
+	}
+	q
+]]></Implementation>
+</Method>
+
+<Index name="KodIndex">
+<Properties>Kod</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Private.Cis.BankyD</DataLocation>
+<DefaultData>BankyDefaultData</DefaultData>
+<IdLocation>^DF.Private.Cis.BankyD</IdLocation>
+<IndexLocation>^DF.Private.Cis.BankyI</IndexLocation>
+<StreamLocation>^DF.Private.Cis.BankyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="BankyDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Kod</Value>
+</Value>
+<Value name="3">
+<Value>Nazov</Value>
+</Value>
+<Value name="4">
+<Value>Platny</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

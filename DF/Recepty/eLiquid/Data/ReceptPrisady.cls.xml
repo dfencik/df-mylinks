@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Recepty.eLiquid.Data.ReceptPrisady">
+<Super>%Persistent</Super>
+<TimeCreated>62901,34147.733669</TimeCreated>
+
+<Property name="ObjPrisada">
+<Type>DF.Recepty.eLiquid.Cis.Prisady</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="PocetKvapiek">
+<Type>%String</Type>
+</Property>
+
+<Property name="Kvapky">
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="Poznamka">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="4000"/>
+</Property>
+
+<Property name="ReceptRef">
+<Type>DF.Recepty.eLiquid.Data.Recept</Type>
+<Cardinality>parent</Cardinality>
+<Inverse>Prisady</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Recepty.e4E3E.ReceptPrisadyD</DataLocation>
+<DefaultData>ReceptPrisadyDefaultData</DefaultData>
+<IdLocation>^DF.Recepty.e4E3E.ReceptPrisadyD</IdLocation>
+<IndexLocation>^DF.Recepty.e4E3E.ReceptPrisadyI</IndexLocation>
+<StreamLocation>^DF.Recepty.e4E3E.ReceptPrisadyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="ReceptPrisadyDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ObjPrisada</Value>
+</Value>
+<Value name="3">
+<Value>PocetKvapiek</Value>
+</Value>
+<Value name="4">
+<Value>Objem</Value>
+</Value>
+<Value name="5">
+<Value>Kvapky</Value>
+</Value>
+<Value name="6">
+<Value>Poznamka</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

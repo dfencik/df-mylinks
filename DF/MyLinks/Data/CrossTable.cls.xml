@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.MyLinks.Data.CrossTable">
+<Super>%Persistent</Super>
+<TimeCreated>62906,48239.198917</TimeCreated>
+
+<Property name="ClientIP">
+<Type>%String</Type>
+<InitialExpression>"127.0.0.1"</InitialExpression>
+<Required>1</Required>
+</Property>
+
+<Property name="ObjGroup">
+<Type>DF.MyLinks.Data.myLinksGroups</Type>
+</Property>
+
+<Index name="ClientGrpIndex">
+<Properties>ClientIP,ObjGroup</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.MyLinks.Data.CrossTableD</DataLocation>
+<DefaultData>CrossTableDefaultData</DefaultData>
+<IdLocation>^DF.MyLinks.Data.CrossTableD</IdLocation>
+<IndexLocation>^DF.MyLinks.Data.CrossTableI</IndexLocation>
+<StreamLocation>^DF.MyLinks.Data.CrossTableS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="CrossTableDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ClientIP</Value>
+</Value>
+<Value name="3">
+<Value>ObjGroup</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

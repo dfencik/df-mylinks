@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.ui.Platby">
+<Super>WEB.Base.CSPPage</Super>
+<TimeCreated>62532,30863.881507</TimeCreated>
+
+<Parameter name="TABLEWIDTH">
+<Default>900</Default>
+</Parameter>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PAGETITLE">
+<Default>Platby</Default>
+</Parameter>
+
+<Method name="DrawPageContent">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	#dim rs as %ResultSet
+	#dim rs2 as %ScrollableResultSet
+	#dim ostre,strSQL,txt,ret,trNo,recno,recno2,parentId,trID,datum,pId,tData,zaplatene,tTitle,platny=""
+	#dim sc=$$$OK
+	#dim ex as %Exception.AbstractException
+	try
+	{
+		&html<
+		<div class="dialog"></div>>
+		w "<a href="""_..Link("DF.Private.ui.Ciselniky.cls")_""">Číselníky</a><br />",!
+		&html<
+		<table cellpadding="1" cellspacing="1" border="0" style="width:#(..#TABLEWIDTH)#px;">
+		 <caption style="font-family: Arial, Helvetica, sans-serif;font-size: 1.2em;text-decoration: none;font-style: normal;">Mesačné úhrady</caption>
+		  <tbody>
+		>
+		s strSQL="SELECT top 12 mm.Zaplatene Zaplatene,su.total total,mm.ID id,mm.Datum dd,mm.MojUcet mu FROM DF_Private_Data.Main mm "
+		s strSQL=strSQL_"left join ( "
+		s strSQL=strSQL_"select ParentRef,sum(case when Suma is null then Partner->Suma else Suma end) as total from DF_Private_Data.MainPolozky where Platny=1 "
+		s strSQL=strSQL_"group by ParentRef "
+		s strSQL=strSQL_") su on su.ParentRef=mm.id "
+		s strSQL=strSQL_" having mm.Platny=1 Order by 3 DESC"
+		s rs=##class(%ResultSet).%New()
+		s rs.RuntimeMode=2
+		$$$THROWONERROR(sc,rs.Prepare(strSQL))
+		$$$THROWONERROR(sc,rs.Execute())
+		while rs.Next()
+		{
+			s pId=rs.Data("id")
+			s recno=$i(recno)
+			s trID="tr_"_$replace(rs.Data("dd"),".","")
+			s zaplatene=+rs.Data("Zaplatene")
+			&html<
+				 <tr class="#(trID)#">
+				  <td class="grpSeparator#($s(zaplatene=0:" active",1:""))#" style="width:#(..#TABLEWIDTH)#px;">
+				   <a class="grpName" href="javascript:void(0)">#(rs.Data("dd"))#</a>
+				   <span style="float:left;padding-left:10px;">&nbsp;</span>
+				   <input type="hidden" value="#(pId)#">
+				   <span style="padding-left:5px;float:right;color:red;height:35px;"><br />&nbsp;#(rs.Data("total"))#&euro;</span>>
+				   i zaplatene=0
+				   {
+				   	&html<	
+				   			<span style="float:right;"><a style="border:none;" class="delete" href="javascript:void(0);"><img class="actionImg" title="Vymazať" src="pic/no.png" /></a></span>
+				   			<span style="float:right;"><a style="border:none;" class="pay" href="javascript:void(0);"><img class="actionImg" title="Zaplatené" src="pic/ok.png" /></a></span>
+				   			<span style="float:right;"><a style="border:none;" class="new" href="javascript:void(0);" pref="#(pId)#"><img class="actionImg new" title="Nový záznam" src="pic/add_window_1.png" /></a></span>>
+				   }
+				   &html<
+				   		   <span style="float:right;"><a style="border:none;" class="copy" href="javascript:void(0);"><img class="actionImg" title="Kópia" src="pic/copy.png" /></a></span>
+				   		   <span style="float:right;"><a style="border:none;" class="download" href="javascript:void(0);"><img class="actionImg" title="Stiahnuť" src="pic/file.png" /></a></span>
+				   </td></tr>>
+				s strSQL="SELECT mp.PlatiDo pPlatiDo, mp.DatumSplatnosti dSplat,ID id,su.total,mp.ParentRef pref,mp.ParentRef->Datum datum,UcetCely As ba, "
+				s strSQL=strSQL_"DF_Private_ui.Platby_getDesc(Poznamka,Partner->MenoPartnera) As mpart, "
+				s strSQL=strSQL_"case when Suma is null then Partner->Suma else Suma end As suma, "
+				s strSQL=strSQL_"case when KonstantnySymbol is null then Partner->KonstantnySymbol->Kod else KonstantnySymbol->Kod end As ks, "
+				s strSQL=strSQL_"case when VariabilnySymbol is null then Partner->VariabilnySymbol else VariabilnySymbol end As vs, "
+				s strSQL=strSQL_"case when SpecifickySymbol is null then Partner->SpecifickySymbol else SpecifickySymbol end As ss, "
+				s strSQL=strSQL_"case when SpravaPre is null then Partner->Poznamka else SpravaPre end As sprava, "
+				s strSQL=strSQL_"Poznamka As pozn "
+				s strSQL=strSQL_"FROM DF_Private_Data.MainPolozky mp "
+				s strSQL=strSQL_"left join ( "
+				s strSQL=strSQL_"select ParentRef,sum(case when Suma is null then Partner->Suma else Suma end) as total from DF_Private_Data.MainPolozky where Platny=1 "
+				s strSQL=strSQL_"group by ParentRef "
+				s strSQL=strSQL_") su on su.ParentRef=mp.ParentRef "
+				s strSQL=strSQL_" having mp.ParentRef=? and mp.ParentRef->Platny=1 and mp.Platny=1 ORDER BY mp.ParentRef->Datum DESC,Partner->MenoPartnera ASC"
+				s rs2=##class(%ScrollableResultSet).%New()
+				s rs2.RuntimeMode=2
+				$$$THROWONERROR(sc,rs2.Prepare(strSQL))
+				$$$THROWONERROR(sc,rs2.Execute(pId))
+				i rs2.Count() > 0
+				{
+					w "<tr class=""childs"" style="""_$s(recno'=1:"display:none;",1:"")_"""><td style=""width:890px;border:none;padding:0;""><table cellspacing=""0"" cellpadding=""0"" border=""0"" style=""width:885px;"">",!
+				}
+				s recno2=""
+				while rs2.Next()
+				{
+					s recno2=$i(recno2)
+					s platny=""
+					i rs2.Data("pPlatiDo")'=""
+					{
+						s platny=$s(+$h'<$zdh(rs2.Data("pPlatiDo")):" neplatny",1:"")
+					}
+					&html<
+				 <tr class="#($s(rs2.CurrRow#2=0:"even",1:"odd")_platny)#">
+			       <td style="width:15px;background:#FBFBF8;border-bottom:none;border-right:1px dotted lightgray;"><input type="hidden" value="#(rs2.Data("id"))#" />&nbsp;</td>
+			       <td style="width:21px;border-right:1px dotted lightgray;text-align:center">#(recno2)#.</td>
+			       <td style="width:400px;border-right:1px dotted lightgray;" title="Partner">>
+			       	
+			       	i 1=1,'zaplatene  
+			       	{
+				       	w "<a style=""border:none;"" href=""javascript:void(0);"" onclick=""editRecord('"_rs2.Data("id")_"','"_zaplatene_"');"">"_rs2.Data("mpart")_"</a>"
+			       	}
+			       	else
+			       	{
+			       		w rs2.Data("mpart")
+			       	}
+			       w "</td>"
+			       f txt="ba~Účet","ks~Konštantný symbol","vs~Variabilný symbol","ss~Špecifický symbol","suma~Suma","dSplat~Dátum splatnosti","pPlatiDo~Platí do","sprava~Správa pre prijímateľa"
+			       {
+			       	s tData=$p(txt,"~"), tTitle=$p(txt,"~",2)
+			       	s ret=rs2.Data(tData)
+			       	i tData="suma"
+			       	{
+			       		s ret="<strong>"_ret_"&nbsp;&euro;</strong>"
+			       	}
+			       	i tData="sprava"
+			       	{
+			       		&html<<td style="width:100px;" class="num" title="#(tTitle)#">#($s(ret="":"&nbsp;",1:ret))#</td>>
+			       	}
+			       	elseif tData="ba"
+			       	{
+			       		&html<<td style="width:300px;" class="num" title="#(tTitle)#">#($s(ret="":"&nbsp;",1:ret))#</td>>
+			       	}
+			       	else
+			       	{
+			       		&html<<td class="num" title="#(tTitle)#">#($s(ret="":"&nbsp;",1:ret))#</td>>
+			       	}
+			       }
+			       &html<
+			        <td style="width:100px;" title="Intená poznámka">#(rs2.Data("pozn"))#</td>
+			        <td style="border-right:1px dotted lightgray;">&nbsp;</td>
+			       </tr>>
+				}
+				i rs2.Count() > 0
+				{
+					w "</table></td></tr>",!
+				}
+				
+		}
+	}
+	catch ex
+	{
+		&html<<tr><td style="width:100%;">#(..noRows(ex.DisplayString()))#</td></tr>>	
+	}	
+	&html<</tbody></table>>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="mod11">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>numero</FormalSpec>
+<Implementation><![CDATA[
+	i $l(numero)'=10 {q "?"}
+
+	s cifras(1)="1"
+	s cifras(2)="2"
+	s cifras(3)="4"
+	s cifras(4)="8"
+	s cifras(5)="5"
+	s cifras(6)="10"
+	s cifras(7)="9"
+	s cifras(8)="7"
+	s cifras(9)="3"
+	s cifras(10)="6"
+	s chequeo=0
+	for a=1:1:10
+	{
+	    s chequeo = chequeo + $e(numero,a) * cifras(a)
+	}
+	s chequeo = 11 - (chequeo # 11)
+	if (chequeo = 11) {s chequeo = 0}
+	if (chequeo = 10) {s chequeo = 1}
+	q chequeo
+]]></Implementation>
+</Method>
+
+<Method name="DrawHeadJavascripts">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	&html<
+	<style>
+	input[type='checkbox'] { padding:0;margin:0;horizontal-align:middle;vertical-align:center;}	
+	</style>
+	<script type="text/javascript" language="javascript">
+	var $a="<a href=\"javascript:void(0);\" style=\"text-decoration: none; cursor: pointer;\">pridať</a>"
+	$(document).ready(function(){
+		$.fn.getContent=function(obj)
+		{
+			var parentId=obj.getAttribute("parentId");
+			var method=obj.getAttribute("method");
+			var objId=obj.getAttribute("objId");
+			var zaplatene=obj.getAttribute("zapl");
+			if(typeof parentId == "undefined") parentId="";
+			if(typeof objId == "undefined") objId="";
+			var linka=#server(..Link("DF.Private.ui.DialogContent.cls?zaplatene="+zaplatene+"&parentId="+parentId+"&objId="+objId+"&method="+method))#;
+			$.get(linka, function(data) {$(obj).html(data)});
+			return;
+		}
+		$dialog=$(".dialog");
+		$dialog.dialog({
+			title: "Pridať úhradu",
+			autoOpen: false,
+			height: 620,
+			width: 580,
+			modal: true,
+			objId: null,
+			parentId: null,
+			open: function(){
+				$('.ui-state-default').css('float','right');
+				$(this).html('');
+				$(this).getContent(this);},
+			overlay: { backgroundColor: '#000', opacity: 0.5 },			
+			buttons: { "Zavri":  function() { $(this).dialog("close");},
+					   "Ulož":  function() { saveDialog($(this),'1');},
+					   "Vymaž":  function() { saveDialog($(this),'-1');}
+				}
+			});
+		
+		//stiahnut
+		var $a=$(".download");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			var id=$(this).parents("td").find("input[type='hidden']").val();
+			var dtm=$(this).parents("td").children(".grpName").html();
+				$("body").remove("#docdownloadframe1");
+			var datum=prompt('Zadaj dátum splatnosti',dtm);
+				if(datum==null) datum=dtm;
+			var lnk=#server(..Link("DF.Private.ui.GetFile.cls?parentId=" + id +"&datum=" + datum))#;
+			var $iframe=$("<iframe id=\"docdownloadframe1\" style=\"display:none\" src=\"" + lnk + "\"></iframe>");
+			$("body").append($iframe);			
+			return;
+		  });
+		
+		//vymazat
+		var $a=$(".delete");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			  var id=$(this).parents("td").find("input[type='hidden']").val();
+			  if(!confirm("Vymazať evidenciu ?")) return;
+			  var ret=#server(..doDelete(id))#;
+			  if(ret!='1')
+			  {
+			  	alert(ret)
+			  }
+			  else
+			  {
+		  	  	document.location.reload(true);
+		  	  }
+		  	  return;
+		  });
+		
+		//zaplatene
+		var $a=$(".pay");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			  var id=$(this).parents("td").find("input[type='hidden']").val();
+			  if(!confirm("Zaplatené ?")) return;
+			  var ret=#server(..setZaplatene(id))#;
+			  if(ret!='1')
+			  {
+			  	alert(ret)
+			  }
+			  else
+			  {
+		  	  	document.location.reload(true);
+		  	  }
+		  	  return;
+		  });
+		//kopia
+		var $a=$(".copy");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			  e.stopPropagation();
+			  var $tds=$(this).parents("tr").next("tr.childs").find("td:nth-child(2)")
+			  if($tds.find("input[type=checkbox]").size() == 0)
+			  {
+			  	$tds.each(function(i){
+			  		var val =$(this).prev("td").children("input[type=hidden]").val();
+			  		if($(this).parents("tr").hasClass("neplatny"))
+			  		{
+				  		$(this).html("").append("<input type=\"checkbox\" name=\"chks\" value=\""+ val +"\" \>")
+			  		}
+			  		else
+			  		{
+			  			$(this).html("").append("<input type=\"checkbox\" name=\"chks\" checked=\"checked\" value=\""+ val +"\" \>")
+			  		}
+			  	})
+			  }
+			  else
+			  {
+			  	if($tds.find("input[type=checkbox]:checked").size()>0)
+			  	{
+				  	var pole='';
+				  	 	$tds.find("input[type=checkbox]:checked").each(function(){
+					  		parentId=pole.split('||')[0];
+					  		pole = pole + "'" + $(this).val() + "',";
+					  	});
+					  	var datum=prompt('Zadaj dátum splatnosti','');
+					  	if(datum==null) {location.reload(); return;}
+					  	var ret=#server(DF.Private.ui.DialogContent.saveNewMain(parentId, datum, pole))#;
+					  	if(ret==1)
+					  	{
+					  		location.reload();
+					  		return
+					  	}
+					  	else
+					  	{
+					  		alert(ret);
+					  	}
+				  	}
+				  	else
+				  	{
+				  		alert("Označ nejaký riadok...")
+				  	}
+			  }
+			  });
+		
+		//skryvanie - /odkryvanie
+		var $a=$(".grpName");
+		$a
+		  .unbind('click')
+		  .bind('click',function(){
+			  var $parent=$(this).parents("tr").next("tr.childs").toggle();
+			  });
+		
+		//novy zaznam
+		$a=$("a.new");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			  	$dialog.attr({'objId':'','parentId':$(this).attr('pref'),'method':'dialogContent'});
+				$dialog.dialog('option','title','Nový záznam');
+				$dialog.dialog('open');
+			  });
+		});
+
+	function showCalendar(toElement)
+	{
+		var	$datepicker=$("#datepicker");
+		$datepicker.datepicker({ altField: toElement,altFormat: "dd.mm.yy" });
+		$datepicker.datepicker("show");
+		return;
+	}
+
+	function editRecord(id,zaplatene)	
+	{
+		var zapl=typeof(zaplatene)=='undefined' ? 0 : zaplatene;
+		$dialog.attr({'objId':id,'parentId':id.split('||')[0],'method':'dialogContent','zaplatene':zapl});
+		$dialog.dialog('option','title','Úprava záznamu [\''+id+'\']');
+		$dialog.dialog('open');
+		return;
+	}
+	
+	function setItems(pId)
+	{
+		var ret=#server(..getPartner(pId))#;
+			$("#tUcet").val(ret.split('~')[0]);
+			$("#tKSymbol").val(ret.split('~')[1]);
+			$("#tVSymbol").val(ret.split('~')[2]);
+			$("#tSSymbol").val(ret.split('~')[3]);
+			$("#tSuma").val(ret.split('~')[4]);
+			$("#tPoznamka").val(ret.split('~')[5]);
+			$("#tExternaURL").val(ret.split('~')[6]);
+			$("#tPlatiDo").val(ret.split('~')[7]);
+		return
+	}
+	
+	function saveDialog($dlg,action)
+	{
+		var id=$dlg.attr('objId');
+		if(action=='-1' && id!='')
+		{
+			if(!confirm('Vymazať záznam \''+ id +'\'')) return;
+		}
+		else if(action=='-1' && id=='')
+		{
+			action=1;
+		}
+		var parentId=$dlg.attr('parentId');
+		var tNewPartner=$("#tNewPartner").val();
+		var tPartner=$("#tPartner").val();
+		var tUcet=$("#tUcet").val();
+		var tKSymbol=$("#tKSymbol").val();
+		var tVSymbol=$("#tVSymbol").val();
+		var tSSymbol=$("#tSSymbol").val();
+		var tSuma=$("#tSuma").val();
+		var tDatSplat=$("#tDatSplat").val();
+		var tPoznamka=$("#tPoznamka").val();
+		var tSprava=$("#tSprava").val();
+		var tExternaURL=$("#tExternaURL").val();
+		var tPlatiDo=$("#tPlatiDo").val();
+		var ret=#server(DF.Private.ui.DialogContent.saveData(id,parentId,tPartner,tNewPartner,tUcet,tKSymbol,tVSymbol,tSSymbol,tSuma,tDatSplat,tPlatiDo,tSprava,tPoznamka,tExternaURL,action))#;
+		if(ret!=1)
+		{
+			alert(ret)
+		}
+		else
+		{
+			$dlg.dialog("close");
+			location.reload();
+		}
+		return;
+	}
+	</script>
+	>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="doDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim ret,sc = 1
+	#dim ex as %Exception.AbstractException
+	#dim obj as DF.Private.Data.Main
+	try
+	{
+		$$$THROWONERROR(sc,##class(DF.Private.Data.Main).%DeleteId(id))
+	}
+	catch ex
+	{
+		s ret=ex.DisplayString()
+	}
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="setZaplatene">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim ret,sc = 1
+	#dim ex as %Exception.AbstractException
+	#dim obj as DF.Private.Data.Main
+	try
+	{
+		s obj=##class(DF.Private.Data.Main).%OpenId(id)
+		s obj.Zaplatene=1
+		$$$THROWONERROR(sc,obj.%Save())
+	}
+	catch ex
+	{
+		s ret=ex.DisplayString()
+	}
+	k obj
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="getPartner">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim obj as DF.Private.Cis.Partneri
+	#dim ret=""
+	s obj=##class(DF.Private.Cis.Partneri).%OpenId(id)
+	s ret=	obj.UcetCely_"~"_
+			obj.KonstantnySymbol.%Id()_"~"_
+	        obj.VariabilnySymbol_"~"_
+	        obj.SpecifickySymbol_"~"_
+	        obj.Suma_"~"_
+	        obj.Poznamka_"~"_
+	        obj.ExternaURL_"~"_
+	        obj.PlatiDoLogicalToDisplay(obj.PlatiDo)
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="getDesc">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Arg1:%String,Arg2:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[	q $s(Arg2="":"<font style=""font-style:italic;color:silver;"">"_Arg1_"</font>",1:Arg2)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.MyLinks.Data.myLinksGroups">
+<Super>%Persistent</Super>
+<TimeCreated>62517,73929.392056</TimeCreated>
+
+<Property name="nazov">
+<Type>%String</Type>
+</Property>
+
+<Property name="pinned">
+<Type>%Boolean</Type>
+</Property>
+
+<Property name="sortByHits">
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+<Required>1</Required>
+</Property>
+
+<Index name="NazovIndex">
+<Properties>nazov</Properties>
+</Index>
+
+<Method name="pinUnpin">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>grpID,action</FormalSpec>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	&sql(update DF_MyLinks_Data.myLinksGroups set pinned = :action where id = :grpID)
+	q
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.MyLinks.Data.myLinksGroupsD</DataLocation>
+<DefaultData>myLinksGroupsDefaultData</DefaultData>
+<IdLocation>^DF.MyLinks.Data.myLinksGroupsD</IdLocation>
+<IndexLocation>^DF.MyLinks.Data.myLinksGroupsI</IndexLocation>
+<StreamLocation>^DF.MyLinks.Data.myLinksGroupsS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="myLinksGroupsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>nazov</Value>
+</Value>
+<Value name="3">
+<Value>pinned</Value>
+</Value>
+<Value name="4">
+<Value>sortByHits</Value>
+</Value>
+<Value name="5">
+<Value>ObjCrossTable</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Cis.Base.aCountry">
+<Super>%RegisteredObject</Super>
+<TimeCreated>63221,48635.308792</TimeCreated>
+
+<Property name="name">
+<Type>%String</Type>
+</Property>
+
+<Property name="code">
+<Type>%String</Type>
+</Property>
+
+<Property name="bank">
+<Type>%String</Type>
+</Property>
+
+<Property name="acc">
+<Type>%String</Type>
+</Property>
+
+<Property name="banklng">
+<Type>%String</Type>
+</Property>
+
+<Property name="acclng">
+<Type>%String</Type>
+</Property>
+
+<Property name="totallng">
+<Type>%String</Type>
+</Property>
+
+<Method name="CountryDecodeFormat">
+<FormalSpec><![CDATA[form,&ret]]></FormalSpec>
+<Implementation><![CDATA[
+	#dim part,typ,lng,tmp,formlist
+	k ret
+	f tmp=1:1:$l(form,$c(32))
+	{
+		s part=$p(form,$c(32),tmp)
+		if (part '= "")
+	    {
+	      s typ = $e(part,*)
+	      if (typ = "a" !(typ = "n"))
+	      {
+	        s part = $e(part)
+	      }
+	      else
+	       { s typ = "c"}
+	      s lng = +part
+	      s ret($i(ret))=lng_","_typ
+	    }	
+	}
+	q
+]]></Implementation>
+</Method>
+</Class>
+</Export>

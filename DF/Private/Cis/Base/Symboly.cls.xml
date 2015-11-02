@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Cis.Base.Symboly">
+<Abstract>1</Abstract>
+<TimeCreated>62530,59045.739333</TimeCreated>
+
+<Property name="Suma">
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="KonstantnySymbol">
+<Type>DF.Private.Cis.kSymboly</Type>
+</Property>
+
+<Property name="VariabilnySymbol">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="11"/>
+</Property>
+
+<Property name="SpecifickySymbol">
+<Type>%String</Type>
+</Property>
+</Class>
+</Export>

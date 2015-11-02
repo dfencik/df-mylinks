@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Data.MainObraty">
+<Super>%Persistent</Super>
+<TimeCreated>63400,37611.266952</TimeCreated>
+
+<Property name="TypZaznamu">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="3"/>
+</Property>
+
+<Property name="CisloUctuPar">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="16"/>
+</Property>
+
+<Property name="NazovOrg">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="20"/>
+</Property>
+
+<Property name="DatumZostatku">
+<Type>%Date</Type>
+</Property>
+
+<Property name="StaryZostatok">
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="ZnamienkoZostatokStary">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+</Property>
+
+<Property name="NovyZostatok">
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="ZnamienkoZostatokNovy">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+</Property>
+
+<Property name="ObratyDebet">
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="ZnamienkoObratovDebet">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+</Property>
+
+<Property name="ObratyKredit">
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="ZnamienkoObratovKredit">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+</Property>
+
+<Property name="PoradoveCisloVypisu">
+<Type>%Integer</Type>
+</Property>
+
+<Property name="DatumUctovania">
+<Type>%Date</Type>
+</Property>
+
+<Property name="KodMeny">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="3"/>
+</Property>
+
+<Property name="OdbytoveMiesto">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="3"/>
+</Property>
+
+<Method name="ImportAdresar">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>adresar:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim ex as %Exception.AbstractException
+	#dim sc = $$$OK
+	#dim file
+	try
+	{
+		s adresar=##class(%File).NormalizeDirectory(adresar)
+		i adresar=""
+		{
+			$$$ThrowStatus($$$ERROR(-999,"Adresár je povinná položka"))
+		}
+		s file=$zsearch(adresar_"*.gpc")
+		while file'=""
+		{
+			$$$THROWONERROR(sc,..ImportVypis(file))
+			s file=$zsearch("")
+		}
+	}
+	catch ex
+	{
+		s sc=ex.AsStatus()
+	}
+	q sc
+]]></Implementation>
+</Method>
+
+<Method name="ImportVypis">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>fname:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim ex as %Exception.AbstractException
+	#dim sc = $$$OK
+	#dim file As %FileCharacterStream
+	#dim line,datumUctovania
+	#dim obj as DF.Private.Data.MainObraty
+	#dim objPolozky as DF.Private.Data.MainObratyPolozky
+	try
+	{
+		s file=##class(%FileCharacterStream).%New()
+		s file.Filename=fname
+		i 'file.AtEnd
+		{
+			s line=$zstrip(file.ReadLine(),"<>","W")
+			s datumUctovania=$zdh($e($e(line,109,114),1,2)_"."_$e($e(line,109,114),3,4)_"."_(2000+$e($e(line,109,114),5,6)))
+			&sql(delete from MainObraty where DatumUctovania=:datumUctovania)
+			i SQLCODE'=0,SQLCODE'=100
+			{
+				throw ##class(%Exception.SQL).CreateFromSQLCODE(SQLCODE,$g(%msg))
+			}
+			s obj=##class(DF.Private.Data.MainObraty).%New()
+			s obj.TypZaznamu=$e(line,1,3)
+			s obj.CisloUctuPar=$e(line,4,19)
+			s obj.NazovOrg=$zstrip($e(line,20,39),"<>"," ")
+			s obj.DatumZostatku=$zdh($e($e(line,40,45),1,2)_"."_$e($e(line,40,45),3,4)_"."_(2000+$e($e(line,40,45),5,6)))
+			s obj.StaryZostatok=$e(line,46,59)/100
+			s obj.ZnamienkoZostatokStary=$e(line,60)
+			s obj.NovyZostatok=+$e(line,61,74)/100
+			s obj.ZnamienkoZostatokNovy=$e(line,75)
+			s obj.ObratyDebet=+$e(line,76,89)/100
+			s obj.ZnamienkoObratovDebet=$e(line,90)
+			s obj.ObratyKredit=+$e(line,91,104)/100
+			s obj.ZnamienkoObratovKredit=$e(line,105)
+			s obj.PoradoveCisloVypisu=$e(line,106,108)
+			s obj.DatumUctovania=datumUctovania
+			s obj.KodMeny=$e(line,115,117)
+			s obj.OdbytoveMiesto=$e(line,118,120)
+			$$$THROWONERROR(sc,obj.%Save())
+			while 'file.AtEnd
+			{
+				s line=file.ReadLine()
+				s objPolozky=##class(DF.Private.Data.MainObratyPolozky).%New()
+				
+				s objPolozky.ObjObraty=obj
+				
+				s objPolozky.TypZaznamu=$e(line,1,3)
+				s objPolozky.CisloUctuPar=$e(line,4,19)
+				s objPolozky.CisloUctu=$e(line,20,35)
+				s objPolozky.CisloDokladu=$e(line,36,48)
+				s objPolozky.Ciastka=$e(line,49,60)/100
+				s objPolozky.KodUctovania=$e(line,61)
+				s objPolozky.VSymbol=$e(line,62,71)
+				s objPolozky.KSymbol=$e(line,72,81)
+				s objPolozky.SSymbol=$e(line,82,91)
+				s objPolozky.Valuta=$zdh($e($e(line,92,97),1,2)_"."_$e($e(line,92,97),3,4)_"."_(2000+$e($e(line,92,97),5,6)))
+				s objPolozky.DoplnUdaj=$zstrip($e(line,98,117),"<>"," ")
+				s objPolozky.ZmenaPolozky=$e(line,118)
+				s objPolozky.DruhUdajov=$e(line,119,122)
+				s objPolozky.DatumSplatnosti=$zdh($e($e(line,123,128),1,2)_"."_$e($e(line,123,128),3,4)_"."_(2000+$e($e(line,123,128),5,6)))
+				$$$THROWONERROR(sc,objPolozky.%Save())
+				k objPolozky
+			}
+			k obj,file
+		}
+	}
+	catch(ex)
+	{
+		s sc=ex.AsStatus()
+	}
+	q sc
+]]></Implementation>
+</Method>
+
+<Property name="PolozkyRef">
+<Type>DF.Private.Data.MainObratyPolozky</Type>
+<Cardinality>children</Cardinality>
+<Inverse>ObjObraty</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Private.Data.MainObratyD</DataLocation>
+<DefaultData>MainObratyDefaultData</DefaultData>
+<IdLocation>^DF.Private.Data.MainObratyD</IdLocation>
+<IndexLocation>^DF.Private.Data.MainObratyI</IndexLocation>
+<StreamLocation>^DF.Private.Data.MainObratyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="MainObratyDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>TypZaznamu</Value>
+</Value>
+<Value name="3">
+<Value>CisloUctuPar</Value>
+</Value>
+<Value name="4">
+<Value>NazovOrg</Value>
+</Value>
+<Value name="5">
+<Value>DatumZostatku</Value>
+</Value>
+<Value name="6">
+<Value>StaryZostatok</Value>
+</Value>
+<Value name="7">
+<Value>ZnamienkoZostatokStary</Value>
+</Value>
+<Value name="8">
+<Value>NovyZostatok</Value>
+</Value>
+<Value name="9">
+<Value>ZnamienkoZostatokNovy</Value>
+</Value>
+<Value name="10">
+<Value>ObratyDebet</Value>
+</Value>
+<Value name="11">
+<Value>ZnamienkoObratovDebet</Value>
+</Value>
+<Value name="12">
+<Value>ObratyKredit</Value>
+</Value>
+<Value name="13">
+<Value>ZnamienkoObratovKredit</Value>
+</Value>
+<Value name="14">
+<Value>PoradoveCisloVypisu</Value>
+</Value>
+<Value name="15">
+<Value>DatumUctovania</Value>
+</Value>
+<Value name="16">
+<Value>KodMeny</Value>
+</Value>
+<Value name="17">
+<Value>OdbytoveMiesto</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.MyLinks.Data.History">
+<Super>%Persistent</Super>
+<TimeCreated>62888,45821.398312</TimeCreated>
+
+<Property name="Datum">
+<Type>%TimeStamp</Type>
+</Property>
+
+<Property name="Url">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Index name="daturl">
+<Properties>Datum,Url</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.MyLinks.Data.HistoryD</DataLocation>
+<DefaultData>HistoryDefaultData</DefaultData>
+<IdLocation>^DF.MyLinks.Data.HistoryD</IdLocation>
+<IndexLocation>^DF.MyLinks.Data.HistoryI</IndexLocation>
+<StreamLocation>^DF.MyLinks.Data.HistoryS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="HistoryDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Datum</Value>
+</Value>
+<Value name="3">
+<Value>Url</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Datatypes.Text">
+<Super>%Text.Text</Super>
+<TimeCreated>62901,35188.987877</TimeCreated>
+
+<Method name="BuildValueArray">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[String:%Binary,&IndexArray:%Binary]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim i,j,SearchValue,word
+	if String = "" { s IndexArray(1)="" }
+	ELSE  {
+		f i=1:1:$L(String," ") {
+			s word=$P(String," ",i)
+			i word'=""
+			{
+				//kvoli dlzke subscriptu max. 200 znakov!
+				i $f(word,"|@")=0
+				{
+					s word=$e(word,1,200)
+				}
+				i word?1.N
+				{
+					f j=1:1:($L(word)) {
+						s IndexArray($E(word,1,j))=""
+					}
+				}
+				else
+				{
+					//multiword davame spolu... preto replace
+					s IndexArray($replace(word,"|@"," "))=""
+				}
+			}
+		}
+	}
+	QUIT 1
+]]></Implementation>
+</Method>
+
+<Method name="ChooseSearchKey">
+<Description>
+If we must choose exactly one indexable search string from a pattern that
+has more than ..#NGRAMLEN terms, then choose a multi-term pattern that
+occurs in at least 3 documents, if any; otherwise just select the longest term.
+</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>document:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	QUIT document
+]]></Implementation>
+</Method>
+</Class>
+</Export>

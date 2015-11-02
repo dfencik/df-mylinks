@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Cis.Partneri">
+<Super>%Persistent,DF.Private.Cis.Base.Symboly</Super>
+<TimeCreated>62530,33515.414708</TimeCreated>
+
+<Property name="MenoPartnera">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Meno"/>
+</Property>
+
+<Property name="CisloUctu">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Účet"/>
+</Property>
+
+<Property name="Banka">
+<Type>DF.Private.Cis.Banky</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Banka"/>
+</Property>
+
+<Property name="Poznamka">
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Poznámka"/>
+<Parameter name="MAXLEN" value="4000"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PlatiDo">
+<Type>%Date</Type>
+</Property>
+
+<Property name="Platny">
+<Type>%Boolean</Type>
+<InitialExpression>1</InitialExpression>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Platný"/>
+</Property>
+
+<Property name="ExternaURL">
+<Type>%String</Type>
+<Parameter name="CAPTION" value="PartnerWEB"/>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="UcetCely">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode>	s {*}={CisloUctu}</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value="Účet"/>
+</Property>
+
+<Property name="SEPAucet">
+<Type>%String</Type>
+</Property>
+
+<Property name="BankaKod">
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> s {*}=##class(DF.Private.Cis.Partneri).GetBankaKod({Banka})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value="Banka kód"/>
+</Property>
+
+<Method name="UcetCelyGet">
+<ReturnType>%String</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	Quit ..CisloUctu  ;_"/"_..Banka.Kod
+	//q ..SEPAucet
+]]></Implementation>
+</Method>
+
+<Method name="GetBankaKod">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>banka</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&sql(select kod into :kod from DF_Private_Cis.Banky where id=:banka)
+	i SQLCODE
+	{
+		q ""
+	}
+	q kod
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Private.Cis.PartneriD</DataLocation>
+<DefaultData>PartneriDefaultData</DefaultData>
+<IdLocation>^DF.Private.Cis.PartneriD</IdLocation>
+<IndexLocation>^DF.Private.Cis.PartneriI</IndexLocation>
+<StreamLocation>^DF.Private.Cis.PartneriS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="PartneriDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>MenoPartnera</Value>
+</Value>
+<Value name="3">
+<Value>CisloUctu</Value>
+</Value>
+<Value name="4">
+<Value>Banka</Value>
+</Value>
+<Value name="5">
+<Value>Suma</Value>
+</Value>
+<Value name="6">
+<Value>KonstantnySymbol</Value>
+</Value>
+<Value name="7">
+<Value>VariabilnySymbol</Value>
+</Value>
+<Value name="8">
+<Value>SpecifickySymbol</Value>
+</Value>
+<Value name="9">
+<Value>Poznamka</Value>
+</Value>
+<Value name="10">
+<Value>Platny</Value>
+</Value>
+<Value name="11">
+<Value>ExternaURL</Value>
+</Value>
+<Value name="12">
+<Value>DatumSplatnosti</Value>
+</Value>
+<Value name="13">
+<Value>PlatiDo</Value>
+</Value>
+<Value name="14">
+<Value>SEPAucet</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

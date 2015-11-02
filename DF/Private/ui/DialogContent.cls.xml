@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.ui.DialogContent">
+<Super>%CSP.Page</Super>
+<TimeCreated>62531,32397.849241</TimeCreated>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim objId=%request.Get("objId")
+	#dim parentId=%request.Get("parentId")
+	#dim method=%request.Get("method")
+	d $CLASSMETHOD($THIS,method,objId,parentId)
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="cisUpdate">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>params...</FormalSpec>
+<Implementation><![CDATA[
+	#dim id = params(1)
+	#dim cis= params(2)
+	#dim cols = %request.Get("cols")
+	#dim rs as %ResultSet
+	#dim i,type,clmn,data,sc,text,par,caption,strSQL,htmlIDs,kId,bId=""
+	#dim ex as %Exception.AbstractException
+	s rs=##class(%ResultSet).%New()
+	i id=""
+	{
+		s strSQL="select top 1 "
+		s strSQL=strSQL_$replace(cols,"~",",")_" from "_cis
+	}
+	else
+	{
+		s strSQL="select "
+		s strSQL=strSQL_$replace(cols,"~",",")_" from "_cis_" where id="_id
+	}
+	try
+	{
+		$$$THROWONERROR(sc,rs.Prepare(strSQL))
+		$$$THROWONERROR(sc,rs.Execute())
+		&html<<table style="width:490px;">>
+		while rs.Next()
+		{
+			f i=1:1:rs.GetColumnCount()
+			{
+				s clmn=rs.GetColumnName(i)
+				s clmnh=rs.GetColumnHeader(i)
+				i clmn="PlatiDo",rs.Data(clmn)'=""
+				{
+					s data=$zd(rs.Data(clmn))
+				}
+				else
+				{
+					s data=rs.Data(clmn)
+				}
+				s type=rs.GetColumnType(i)
+				&html<<tr><td style="width:90px;">#($s(clmnh'="":clmnh,1:clmn))#</td><td>>
+				i cis="DF_Private_Cis.Partneri",clmn="Banka"
+				{
+						s bId=""
+						s:id'="" bId=##class(DF.Private.Cis.Banky).KodIndexOpen(data).%Id()
+						w ##class(WEB.Components.combobox).DrawCombo("tBanka",bId,"select id ii,kod||' - '||LEFT(Nazov,45) nn from DF_Private_Cis.Banky where Platny=1","ii","nn",""," style=""width:395px;"" ")
+						s htmlIDs=htmlIDs_clmn_"^O~"
+				}
+				elseif cis="DF_Private_Cis.Partneri",clmn="KonstantnySymbol"
+				{
+						s kId=""
+						s:id'="" kId=##class(DF.Private.Cis.kSymboly).KodIndexOpen(data).%Id()
+						w ##class(WEB.Components.combobox).DrawCombo("tKonstantnySymbol",kId,"select id ii,kod||' - '||LEFT(Nazov,45) nn from DF_Private_Cis.kSymboly where Platny=1","ii","nn",""," style=""width:395px;"" ")
+						s htmlIDs=htmlIDs_clmn_"^O~"
+				}
+				else
+				{
+					i id="" s data=""
+					i type=16
+					{
+						s checked=$s(data'="":"checked=""checked""",1:"")
+						&html<<input type="checkbox" name="t#(clmn)#" id="t#(clmn)#" #(checked)# />>
+					}
+					else
+					{
+						&html<<input style="width:395px;" type="text" name="t#(clmn)#" id="t#(clmn)#" value="#(data)#" />>
+					}
+					s htmlIDs=htmlIDs_clmn_"^"_%type(rs.GetColumnType(i))_"~"
+				}
+				&html<</td><td>&nbsp;</td><tr>>
+			}
+		}
+		k rs
+		&html<</table>
+			<input type="hidden" id="colsToSave" value="#($e(htmlIDs,1,*-1))#" />
+		>
+	}
+	catch ex
+	{
+		w ex.DisplayString(),!
+	}
+	q
+]]></Implementation>
+</Method>
+
+<Method name="saveCisData">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objId="",cis="",cols="",data="",action</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim cls = $tr(cis,"_",".")
+	#dim tCols=$lfs(cols,"~")
+	#dim tData=$lfs(data,"~")
+	#dim sc,obj,i,col,isObj,type
+	#dim ex as %Exception.AbstractException
+	s sc=1
+	try
+	{
+		i action=1
+		{
+			s obj=$CLASSMETHOD(cls,$s(objId="":"%New",1:"%OpenId"),objId)
+			f i=1:1:$ll(tCols)
+			{
+				s col=$p($lg(tCols,i),"^")
+				s type=$p($lg(tCols,i),"^",2)
+				i type="O"
+				{
+					d $METHOD(obj,col_"SetObjectId",$lg(tData,i))
+				}
+				else
+				{
+					i type="D"
+					{
+						s $PROPERTY(obj,col)=$METHOD(obj,col_"DisplayToLogical",$lg(tData,i))
+					}
+					else
+					{
+						s $PROPERTY(obj,col)=$lg(tData,i)
+					}
+				}
+			}
+			$$$THROWONERROR(sc,$METHOD(obj,"%Save"))
+		}
+		elseif action="-1"
+		{
+			$$$THROWONERROR(sc,$CLASSMETHOD(cls,"%DeleteId",objId))
+		}
+	}
+	catch ex
+	{
+		s sc=ex.DisplayString()
+	}
+	q sc
+]]></Implementation>
+</Method>
+
+<Method name="dlgIBANcontent">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>nothing...</FormalSpec>
+<Implementation><![CDATA[
+	#dim sCombo=##class(WEB.Components.combobox).DrawCombo("country","SK","SELECT Kod ii,Nazov||' ('||Kod||')' nn FROM DF_Private_Cis.Staty where platny=1 order by 2","ii","nn",""," style=""width:395px;"" ")
+	#dim bCombo=##class(WEB.Components.combobox).DrawCombo("bank","0200","SELECT Kod ii,Nazov||' ('||Kod||')' nn FROM DF_Private_Cis.Banky where platny=1 order by 2","ii","nn",""," style=""width:395px;"" ")
+	&html<
+	<table style="width:490px;">
+	 <tr><td style="width:90px;border-top:1px dotted lightgray;">Štát:</td><td style="border-top:1px dotted lightgray;width:395px;">#(sCombo)#</td><td style="border-top:1px dotted lightgray;">&nbsp;</td></tr>
+	 <tr><td style="width:90px;">Banka:</td><td>#(bCombo)#</td><td>&nbsp;</td></tr>
+	 <tr><td style="width:90px;">Účet:</td><td><input name="account" type="text" size="22" maxlength="22"></td><td>&nbsp;</td></tr>
+	 <tr><td style="width:90px;">IBAN:</td><td><input readonly="readonly" name="iban" type="text" size="39" maxlength="47" /></td><td><input type="button" value="Vytvor IBAN" onclick="$('input[name=iban]').val(makeIBAN($('select[name=country]').val(),$('select[name=bank]').val(),$('input[name=account]').val()));"/></td></tr>
+	 </table>
+	>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="dialogContent">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objId="",parentId</FormalSpec>
+<Implementation><![CDATA[
+	#dim obj as DF.Private.Data.MainPolozky
+	#dim c=$c(13,10)
+	s obj=$CLASSMETHOD("DF.Private.Data.MainPolozky",$s(objId="":"%New",1:"%OpenId"),objId)
+	#dim partner,ucet,ks,vs,ss,suma,pozn,datsplat,ksCombo,pCombo,ExternaURL=""
+	s pCombo=##class(WEB.Components.combobox).DrawCombo("tPartner",##class(WEB.Util).getObjValue(obj,"Partner","%Id",0,,0),"SELECT id ii,MenoPartnera mm FROM DF_Private_Cis.Partneri where Platny=1","ii","mm",""," style=""width:395px;"" onchange=""setItems(this.value);"" ",1,,,,%zaplatene)
+	s partner=pCombo  ;"<input style=""width:390px;"" type=""text"" name=""tPartner"" id=""tPartner"" value="""_obj.Partner.MenoPartnera_""" readonly/>"
+	s ucet=##class(WEB.Util).getObjValue(obj,"UcetCely",,0,,0)
+	s ks=##class(WEB.Util).getObjValue(obj,"KonstantnySymbol","%Id",0,,0)
+	s vs=##class(WEB.Util).getObjValue(obj,"VariabilnySymbol",,0,,0)
+	s ss=##class(WEB.Util).getObjValue(obj,"SpecifickySymbol",,0,,0)
+	s suma=##class(WEB.Util).getObjValue(obj,"Suma",,1,,0)
+	s pozn=##class(WEB.Util).getObjValue(obj,"Poznamka",,0,,0)
+	s sprava=##class(WEB.Util).getObjValue(obj,"SpravaPre",,0,,0)
+	s pObj=##class(DF.Private.Data.Main).%OpenId(parentId)
+	s realDatSplat=##class(WEB.Util).getObjValue(pObj,"Datum",,1,,0)
+	s datsplat=##class(WEB.Util).getObjValue(obj,"DatumSplatnosti",,1,,0,realDatSplat)
+	s platido=##class(WEB.Util).getObjValue(obj,"PlatiDo",,1,,0)
+	s ExternaURL=##class(WEB.Util).getObjValue(obj,"ExternaURL",,0,,0)
+	s ksCombo=##class(WEB.Components.combobox).DrawCombo("tKSymbol",ks,"select id ii,kod||' - '||LEFT(Nazov,45) nn from DF_Private_Cis.kSymboly where Platny=1","ii","nn",""," style=""width:395px;"" ",,,,,%zaplatene)
+	s readonly=$s(%zaplatene:" readonly='readonly' ",1:"")
+	&html<
+		<table style="width:490px;">
+		 <tr><td style="width:90px;border-top:1px dotted lightgray;">Partner:</td><td style="border-top:1px dotted lightgray;width:395px;">#(partner)#</td><td style="border-top:1px dotted lightgray;">&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Účet:</td><td><input#(readonly)# style="width:395px;" type="text" name="tUcet" id="tUcet" value="#(ucet)#" #($select(objId'="":"readonly",1:""))# /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Konšt.symbol:</td><td>#(ksCombo)#</td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Var.symbol:</td><td><input#(readonly)# style="width:195px;text-align:right;" type="text" name="tVSymbol" id="tVSymbol" value="#(vs)#" maxlength="10" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Špec.symbol:</td><td><input#(readonly)# style="width:195px;text-align:right;" type="text" name="tSSymbol" id="tSSymbol" value="#(ss)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Suma:</td><td><input#(readonly)# style="width:95px;text-align:right;" type="text" name="tSuma" id="tSuma" value="#(suma)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Dát.splat.:</td><td><input#(readonly)# style="width:95px;text-align:right;" type="text" name="tDatSplat" id="tDatSplat" value="#(datsplat)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Platí do:</td><td><input#(readonly)# style="width:95px;text-align:right;" type="text" name="tPlatiDo" id="tPlatiDo" value="#(platido)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Správa:</td><td><input#(readonly)# style="width:395px;" type="text" name="tSprava" id="tSprava" value="#(sprava)#" maxlength="35" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Poznámka:</td><td><textarea#(readonly)# cols="50" rows="3" name="tPoznamka" id="tPoznamka">#(pozn)#</textarea></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Uložiť ako partnera:</td><td><input#(readonly)# style="width:395px;" type="text" name="tNewPartner" id="tNewPartner" value="" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">WEB partnera:</td><td><input#(readonly)# style="width:395px;" type="text" name="tExternaURL" id="tExternaURL" value="#(ExternaURL)#" /></td><td>&nbsp;</td><tr>
+		</table>
+	>
+	k obj
+	q
+]]></Implementation>
+</Method>
+
+<Method name="saveNewMain">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>tparentId,tDatum,pole</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim obj as DF.Private.Data.Main
+	#dim newId,ret,datum,strSQL,sc="1"
+	#dim ex as %Exception.AbstractException
+	#dim rs as %ResultSet
+	try
+	{
+		TSTART
+		s obj=##class(DF.Private.Data.Main).%New()
+		s obj.Datum=obj.DatumDisplayToLogical(tDatum)
+		$$$THROWONERROR(sc,obj.%Save())
+		s newId=obj.%Id()
+		s pole=$e(pole,1,*-1)
+		s rs=##class(%ResultSet).%New()
+		s datum=$p(tDatum,".",3)_"-"_$p(tDatum,".",2)_"-"_$p(tDatum,".")
+		s strSQL="insert into DF_Private_Data.MainPolozky (ParentRef, Poznamka, Partner, DatumSplatnosti,UcetCely,Suma,KonstantnySymbol,VariabilnySymbol,SpecifickySymbol,ExternaURL, PlatiDo,SpravaPre) "_
+		         "select "_newId_",Poznamka, Partner, CAST('"_datum_"' as Date),UcetCely,Suma,KonstantnySymbol,VariabilnySymbol,SpecifickySymbol,ExternaURL,PlatiDo,SpravaPre from DF_Private_Data.MainPolozky pp Where pp.id in("_pole_")"
+		$$$THROWONERROR(sc,rs.Prepare(strSQL))
+		$$$THROWONERROR(sc,rs.Execute())
+		TCOMMIT
+	}
+	catch ex
+	{
+		TROLLBACK
+		s ret=ex.DisplayString()
+	}
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="saveData">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id,tparentId,tPartner,tNewPartner,tUcet,tKSymbol,tVSymbol,tSSymbol,tSuma,tDatSplat,tPlatiDo,tSprava,tPoznamka,tExternaURL,action</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim obj as DF.Private.Data.MainPolozky
+	#dim pobj as DF.Private.Cis.Partneri
+	#dim ret=1
+	#dim bId,banka,sc
+	#dim ex as %Exception.AbstractException
+	s sc=$$$OK
+	try
+	{
+			i tNewPartner'=""
+			{
+				s bId="",banka=$p(tUcet,"/",2)
+				&sql(SELECT id into :bId FROM DF_Private_Cis.Banky where kod=:banka)
+				Throw:SQLCODE ##class(%Exception.StatusException).CreateFromStatus($$$ERROR(-999,"Chybný kód banky"))
+				s pobj=##class(DF.Private.Cis.Partneri).%New()
+				s pobj.MenoPartnera=tNewPartner
+				s pobj.CisloUctu=$p(tUcet,"/")
+				d pobj.BankaSetObjectId(bId)
+				s pobj.SpecifickySymbol=pobj.SpecifickySymbolDisplayToLogical(tSSymbol)
+				s pobj.VariabilnySymbol=pobj.VariabilnySymbolDisplayToLogical(tVSymbol)
+				d pobj.KonstantnySymbolSetObjectId(tKSymbol)
+				s pobj.Suma=pobj.SumaDisplayToLogical(tSuma)
+				s pobj.Poznamka=pobj.PoznamkaDisplayToLogical(tSprava)
+				s pobj.ExternaURL=pobj.ExternaURLDisplayToLogical(tExternaURL)
+				$$$THROWONERROR(sc,pobj.%Save())
+				s tPartner=pobj.%Id()
+				k pobj
+			}
+		i id=""
+		{
+			s obj=##class(DF.Private.Data.MainPolozky).%New()
+		}
+		else
+		{
+			s obj=##class(DF.Private.Data.MainPolozky).%OpenId(id)
+		}
+			d obj.ParentRefSetObjectId(tparentId)
+			d obj.PartnerSetObjectId(tPartner)
+		i action="-1",id'=""
+		{
+			s obj.Platny=0
+			$$$THROWONERROR(sc,obj.%Save())
+			s ret=1
+			q
+		}
+		i tVSymbol'="",'$isvalidnum(tVSymbol)
+		{
+			s ret="Variabilný symbol musí byť číslo"
+			q
+		}
+		i tSSymbol'="",'$isvalidnum(tSSymbol)
+		{
+			s ret="Špecifický sumbol musí byť číslo"
+			q
+		}
+		s obj.SpecifickySymbol=obj.SpecifickySymbolDisplayToLogical(tSSymbol)
+		s obj.VariabilnySymbol=obj.VariabilnySymbolDisplayToLogical(tVSymbol)
+		s obj.UcetCely=tUcet
+		d obj.KonstantnySymbolSetObjectId(tKSymbol)
+		s obj.Suma=obj.SumaDisplayToLogical(tSuma)
+		s obj.DatumSplatnosti=obj.DatumSplatnostiDisplayToLogical(tDatSplat)
+		s obj.PlatiDo=obj.PlatiDoDisplayToLogical(tPlatiDo)
+		s obj.Poznamka=obj.PoznamkaDisplayToLogical(tPoznamka)
+		s obj.SpravaPre=obj.SpravaPreDisplayToLogical(tSprava)
+		s obj.ExternaURL=obj.ExternaURLDisplayToLogical(tExternaURL)
+		$$$THROWONERROR(sc,obj.%Save())
+	}
+	catch ex
+	{
+		s ret=ex.DisplayString()
+	}	
+	k obj
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	s %zaplatene=%request.Get("zaplatene")
+	s %type(1)="C"  ;BINARY 
+	s %type(2)="D"  ;DATE 
+	s %type(3)="D"  ;DOUBLE 
+	s %type(4)="C"  ;HANDLE
+	s %type(5)="D"  ;INTEGER
+	s %type(6)="C"  ;LIST
+	s %type(7)="D"  ;LONGVARCHAR
+	s %type(8)="D"  ;TIME
+	s %type(9)="D"  ;TIMESTAMP
+	s %type(10)="D" ;VARCHAR
+	s %type(11)="D"  ;STATUS
+	s %type(12)="C"  ;BINARYSTREAM
+	s %type(13)="C"  ;CHARACTERSTREAM
+	s %type(14)="D"  ;NUMERIC
+	s %type(15)="D"  ;CURRENCY
+	s %type(16)="C"  ;BOOLEAN
+	s %type(17)="C"  ;OID
+	s %type(18)="D"  ;BIGINT
+	s %type(19)="D"  ;FDATE
+	s %type(20)="D"  ;FTIMESTAMP
+	q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<CSP name="css/dropdownmenu.css" application="/csp/df/" default="1"><![CDATA[
+/* Adjusting the margins, paddings and no list styles */
+.navig {
+	margin:0; 
+	padding:0; 
+	list-style:none;
+	font-size:11px;
+}	
+
+/* Little tricking with positions */
+.navig li {
+	float:left;			/* Show list items inline */
+	width:100px; 
+	position:relative; 
+}
+	
+/* Playing with Main Categories */
+.navig li a{
+	background:#666; 
+	color:#fff;
+	display:block;  	/* Making sure a element covers whole li area */
+	padding:0px; 
+	text-decoration:none; /* No underline */
+	text-align:right; 
+	border:none;
+}
+
+.navig.submenu li a{
+	background:#999;
+}
+
+.navig li a:hover {
+	color:black;
+}
+	
+/* Sub Cat Menu stuff*/
+.navig ul {
+	position:absolute; 
+	left:0; 
+	display:none; /* Hide it by default */
+	margin:0; 
+	padding:0; 
+	list-style:none;
+	z-index:35000;
+}
+	
+.navig ul li {
+	width:100px; 
+	float:left; 
+	border-top:none;
+}
+	
+/* Sub Cat menu link properties */
+.navig ul a {
+	display:block;    	/* Making sure a element covers whole li area */
+	height:15px;
+	padding:6px; 
+	color:#fff;
+	text-decoration:none;	
+	border-top:none;
+	text-align:left;
+}
+	
+.navig  ul a:hover {
+	color:black;
+}
+]]></CSP>
+</Export>

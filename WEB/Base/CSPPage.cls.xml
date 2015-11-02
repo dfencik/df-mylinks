@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WEB.Base.CSPPage">
+<IncludeCode>%occMessages</IncludeCode>
+<Super>%CSP.Page</Super>
+<TimeCreated>61810,30307.121599</TimeCreated>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="CHARSET">
+<Default>UTF-8</Default>
+</Parameter>
+
+<Parameter name="PAGETITLE">
+<Default>MyLinky</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&html<
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+		<link rel="stylesheet" type="text/css" href="css/default.css" />
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui-themes-1.8.7/themes/smoothness/jquery-ui.css" />
+		<link rel="stylesheet" type="text/css" href="css/dropdownmenu.css" />
+		<meta http-equiv="content-language" content="sk" />
+		<meta name="author" content="feDusho" />
+		<meta name="robots" content="noindex,nofollow" />
+		<meta name="copyright" content="(c) 2012, feDusho's golden hands" /> 
+	<title>
+		#[ w ..#PAGETITLE ]#
+	</title>
+	#[ d ..DrawCommonJavascripts(),..DrawHeadJavascripts() ]#
+</head>
+<body class="hpBody">
+ <form name="Form1" method="post" action="" id="Form1">>
+	w ..HyperEventBody(),!
+	w "<a href="""_..Link("DF.Private.ui.Home.cls")_""">home</a><a style=""float:right;"" href="_(..Link("DF.Private.ui.Home.cls?logout=1"))_" title=""Logout"">logout</a><br /><br />",!
+	d ..DrawPageContent() w !
+	&html<
+ </form>
+</body>
+</html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DrawHeadJavascripts">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[	q
+]]></Implementation>
+</Method>
+
+<Method name="DrawCommonJavascripts">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	&html<
+	<script type="text/javascript" language="JavaScript" src="/csp/broker/cspxmlhttp.js"></script><script language="JavaScript" type="text/javascript" src="/csp/broker/cspbroker.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
+	<script type="text/javascript" language="javascript" src="js/jquery.jec.js"></script>
+	
+	>
+	;<script type="text/javascript" language="javascript" src="js/dropdownmenu1.js"></script>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="noRows">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>txt:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim ret=""
+	#dim c=$c(13,10)
+	s ret=ret_"<div class=""warning-message"" style=""width: 900px;text-align:center;font-size:14px;font-weight:bold;background-color:red;color:yellow;"">"_c
+	s ret=ret_$s(txt="":"V databáze sa nenachádza <strong>žiaden záznam</strong> zodpovedajúci podmienkam výberu.",1:txt)_c
+	s ret=ret_"</div>"_c
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="DrawPageContent">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[	q
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Datatypes.Currency">
+<ClassType>datatype</ClassType>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%Currency</Super>
+<TimeCreated>62882,34681.826091</TimeCreated>
+
+<Parameter name="NOOFDECIMALS">
+<Description>
+Pocet des. miest na zobrazenie</Description>
+<Default>2</Default>
+</Parameter>
+
+<Method name="DisplayToLogical">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>%val:%String</FormalSpec>
+<ReturnType>%Currency</ReturnType>
+<Implementation><![CDATA[
+	#dim ngs=##class(%SYS.NLS.Format).GetFormatItem("NumericGroupSeparator")
+	#dim ds=##class(%SYS.NLS.Format).GetFormatItem("DecimalSeparator") 
+	i %val="" q ""
+	q $tr($tr(%val,ngs),ds,".")
+]]></Implementation>
+</Method>
+
+<Method name="LogicalToDisplay">
+<Description><![CDATA[
+Converts the value of <var>%val</var>, which is in currency format, into a display string.
+<p>Returns the formatted value of <var>%val</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>%val:%Currency</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim ds=##class(%SYS.NLS.Format).GetFormatItem("DecimalSeparator")
+	i %val="" q ""
+	q $fn(%val,ds,..#NOOFDECIMALS)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

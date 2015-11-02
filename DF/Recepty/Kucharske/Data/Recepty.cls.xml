@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Recepty.Kucharske.Data.Recepty">
+<Super>%Persistent</Super>
+<TimeCreated>63208,46358.812027</TimeCreated>
+
+<Property name="Nazov">
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="Suroviny">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="5000"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="Popis">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="15000"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="Vytvorene">
+<Type>%Date</Type>
+<InitialExpression>+$h</InitialExpression>
+</Property>
+
+<Property name="Zdroj">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="Tip">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="5000"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="NazovIndex">
+<Properties>Nazov</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Recepty.KucharskE90.ReceptyD</DataLocation>
+<DefaultData>ReceptyDefaultData</DefaultData>
+<IdLocation>^DF.Recepty.KucharskE90.ReceptyD</IdLocation>
+<IndexLocation>^DF.Recepty.KucharskE90.ReceptyI</IndexLocation>
+<StreamLocation>^DF.Recepty.KucharskE90.ReceptyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="ReceptyDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Nazov</Value>
+</Value>
+<Value name="3">
+<Value>Suroviny</Value>
+</Value>
+<Value name="4">
+<Value>Popis</Value>
+</Value>
+<Value name="5">
+<Value>Vytvorene</Value>
+</Value>
+<Value name="6">
+<Value>Zdroj</Value>
+</Value>
+<Value name="7">
+<Value>Tip</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Data.PP">
+<Description>
+Polskie przyslovia</Description>
+<Super>%Persistent</Super>
+<TimeCreated>62657,49125.52373</TimeCreated>
+
+<Property name="Prislovie">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="4000"/>
+</Property>
+
+<Property name="Prislovie2">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="4000"/>
+</Property>
+
+<Property name="Skupina">
+<Type>%String</Type>
+</Property>
+
+<Property name="Krajina">
+<Type>%String</Type>
+<InitialExpression>"SK"</InitialExpression>
+<Required>1</Required>
+</Property>
+
+<Method name="%OnBeforeSave">
+<Description><![CDATA[
+This callback method is invoked by the <METHOD>%Save</METHOD> method to 
+provide notification that the object is being saved. It is called before 
+any data is written to disk.
+
+<P><VAR>insert</VAR> will be set to 1 if this object is being saved for the first time.
+
+<P>If this method returns an error then the call to <METHOD>%Save</METHOD> will fail.]]></Description>
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	i 'insert q $$$OK
+	s ..Skupina=$zcvt($e(..Prislovie),"u")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Index name="SkupinaIndex">
+<Properties>Skupina</Properties>
+</Index>
+
+<Index name="KrajinaIndex">
+<Properties>Krajina</Properties>
+</Index>
+
+<Method name="import">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>subor,kk</FormalSpec>
+<Implementation><![CDATA[
+	d ..%KillExtent()
+	#dim file as %FileCharacterStream
+	#dim text=""
+	s file=##class(%FileCharacterStream).%New()
+	s file.Filename=subor
+	while 'file.AtEnd
+	{
+		s text=file.ReadLine()
+		s ii=$p(text,$c(32))
+		i ii'="*" continue
+		s text=$p(text,$c(32),2,100)
+		s oo=##class(DF.Private.Data.PP).%New()
+		s oo.Prislovie=text
+		s oo.Krajina=kk
+		d oo.%Save()
+		k oo
+	}
+	k file
+	q
+]]></Implementation>
+</Method>
+
+<Method name="dajPrislovie">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>tid=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	#dim ret,id,max=""
+	s ret=""
+	&sql(select MAX(id) into :max from DF_Private_Data.PP)
+	i SQLCODE=0
+	{
+		i max'=""
+		{
+			s id=$random(max)-1
+			i tid'="" s id=tid
+			s pp=##class(DF.Private.Data.PP).%OpenId(id)
+			i pp'=""
+			{
+				s ret=pp.Prislovie
+				i pp.Prislovie2'=""
+				{
+					s ret=ret_"( "_pp.Prislovie2_" )"
+				}
+			}
+		}
+		k pp
+	}
+	else
+	{
+		s ret="Kto druhemu jamu kope, ten sa narobi by FEND"
+	}
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="RemoveHTMLTags">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>co</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim ret,i,p,p2,pxec
+	s ret=""
+	i $f(co,"<")
+	{
+		s ret=$p(co,"<",1)
+		f i=2:1:$l(co,"<")
+		{
+			s p=$p(co,"<",i)
+			i p'=""
+			{
+				s ret=ret_$p(p,">",2)
+			}
+		}
+	}
+	else
+	{
+		s ret=co
+	}
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="RecognizeLAT">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>subor</FormalSpec>
+<Implementation><![CDATA[
+	d ..%KillExtent()
+	#dim file as %FileCharacterStream
+	#dim text=""
+	s file=##class(%FileCharacterStream).%New()
+	s file.Filename=subor
+	while 'file.AtEnd
+	{
+		s line=file.ReadLine()
+		i $f(line,"<li><b>")
+		{
+			;w $p($p(line,"<li><b>",2),"</ul>"),!
+			s lat=$replace($p(line,"<li><b>",2),"</b>","")
+			continue
+		}
+		elseif $f(line,"<li><i>")
+		{
+			s sk=$p($p(line,"<li><i>",2),"</i></li>")
+			s sk=..RemoveHTMLTags(sk)
+		}
+		else
+		{
+			continue
+		}
+		s oo=##class(DF.Private.Data.PP).%New()
+		s oo.Prislovie=lat
+		s oo.Prislovie2=sk
+		s oo.Krajina="LAT"
+		d oo.%Save()
+		k oo
+		;w lat," = ",sk,!
+	}
+	k file
+	q
+]]></Implementation>
+</Method>
+
+<Method name="RecognizePL">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>subor</FormalSpec>
+<Implementation><![CDATA[
+	#dim file as %FileCharacterStream
+	#dim text=""
+	s file=##class(%FileCharacterStream).%New()
+	s file.Filename=subor
+	while 'file.AtEnd
+	{
+		s line=file.ReadLine()
+		i $f(line,"-")
+		{
+			;w $p($p(line,"<li><b>",2),"</ul>"),!
+			s lat=$p(line,"-",2,1000)
+		}
+		
+		s oo=##class(DF.Private.Data.PP).%New()
+		s oo.Prislovie=line
+		s oo.Prislovie2=""
+		s oo.Krajina="PL"
+		d oo.%Save()
+		k oo
+		;w lat," = ",sk,!
+	}
+	k file
+	q
+]]></Implementation>
+</Method>
+
+<Method name="RecognizeSK">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>subor</FormalSpec>
+<Implementation><![CDATA[
+	#dim file as %FileCharacterStream
+	#dim text=""
+	s file=##class(%FileCharacterStream).%New()
+	s file.Filename=subor
+	while 'file.AtEnd
+	{
+		s line=file.ReadLine()
+		i $f(line,"<li>")
+		{
+			;w $p($p(line,"<li><b>",2),"</ul>"),!
+			s lat=..RemoveHTMLTags(line)
+			w lat,!
+			s oo=##class(DF.Private.Data.PP).%New()
+			s oo.Prislovie=lat
+			s oo.Prislovie2=""
+			s oo.Krajina="SK"
+			d oo.%Save()
+			k oo
+		}
+		else
+		{
+			continue
+		}
+		
+		
+		
+	}
+	k file
+	q
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Private.Data.PPD</DataLocation>
+<DefaultData>PPDefaultData</DefaultData>
+<IdLocation>^DF.Private.Data.PPD</IdLocation>
+<IndexLocation>^DF.Private.Data.PPI</IndexLocation>
+<StreamLocation>^DF.Private.Data.PPS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="PPDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Prislovie</Value>
+</Value>
+<Value name="3">
+<Value>Skupina</Value>
+</Value>
+<Value name="4">
+<Value>Krajina</Value>
+</Value>
+<Value name="5">
+<Value>Prislovie2</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

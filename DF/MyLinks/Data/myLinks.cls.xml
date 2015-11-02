@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.MyLinks.Data.myLinks">
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>62517,73929.392056</TimeCreated>
+
+<Property name="url">
+<Type>Datatypes.URL</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="nazov">
+<Type>%String</Type>
+</Property>
+
+<Property name="objskupina">
+<Type>DF.MyLinks.Data.myLinksGroups</Type>
+</Property>
+
+<Property name="skupina">
+<Type>%String</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="hits">
+<Type>%Integer</Type>
+<InitialExpression>1</InitialExpression>
+</Property>
+
+<Property name="showInTop">
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="SearchIndex">
+<Type>%String</Type>
+<Collection>list</Collection>
+<Parameter name="MAXLEN" value="10000"/>
+</Property>
+
+<Property name="Created">
+<Type>%TimeStamp</Type>
+</Property>
+
+<Index name="SearchIndexI">
+<Description>
+Index pre multi vyhladavanie</Description>
+<Properties>SearchIndex(ELEMENTS)</Properties>
+</Index>
+
+<Trigger name="BI">
+<Code>	s {url}=##class(Datatypes.URL).DisplayToLogical({url*N})
+	s %ok=1
+	q</Code>
+<Event>INSERT</Event>
+</Trigger>
+
+<Method name="oonce">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s sc=1
+	try
+	{
+		s rs=##class(%ResultSet).%New()
+		i rs.Prepare("select id id, LOWER(nazov) nazov,LOWER(url) url from DF_MyLinks_Data.myLinks")
+		{
+			i rs.Execute()
+			{
+				while rs.Next()
+				{
+					s sc=..update(rs.Data("id"),rs.Data("nazov"),rs.Data("url"))
+					Throw:('sc) ##class(%Exception.StatusException).CreateFromStatus($$$ERROR(-999,sc))
+					
+				}
+			}
+		}
+	}
+	catch ex
+	{
+		s sc=ex.DisplayString()
+	}
+	q sc
+]]></Implementation>
+</Method>
+
+<Method name="setHit">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objid:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	#dim ret,hitz=1
+	&sql(select hits into :hitz from DF_MyLinks_Data.myLinks where id=:objid)
+	i $g(%sqlcontext)'= "" 
+	{
+    	s %sqlcontext.%SQLCODE=SQLCODE
+     	s %sqlcontext.%ROWCOUNT=%ROWCOUNT 
+    }
+	i 'SQLCODE
+    {
+    	s hitz=$i(hitz,1)
+    	&sql(update DF_MyLinks_Data.myLinks set hits=:hitz where id=:objid)
+    	i $g(%sqlcontext)'= "" 
+		{
+	    	s %sqlcontext.%SQLCODE=SQLCODE
+	    }
+    	i SQLCODE
+    	{
+    		s ret=$g(%msg)
+    	}
+    	else
+    	{
+    		s ret=hitz
+    	}
+    }
+    else
+    {
+    	s ret=$g(%msg)
+    }
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="saveNewGroup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>grpName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	#dim grpID=""
+	&sql(select %NOLOCK id  into :grpID FROM DF_MyLinks_Data.myLinksGroups WHERE upper(nazov)=upper(:grpName))
+	i $g(%sqlcontext)'= "" 
+	{
+    	s %sqlcontext.%SQLCODE=SQLCODE
+     	s %sqlcontext.%ROWCOUNT=%ROWCOUNT 
+    }
+	i SQLCODE=100
+	{
+		&sql(INSERT INTO DF_MyLinks_Data.myLinksGroups (nazov)
+	    	VALUES (:grpName))
+	    	i $g(%sqlcontext)'= "" {
+           		s %sqlcontext.%SQLCODE=SQLCODE
+           		s %sqlcontext.%ROWCOUNT=%ROWCOUNT
+           	}
+	    	i SQLCODE
+	    	{
+	    		s grpID=""
+	    		q
+	    	}
+	    	else
+			{
+				s grpID=%ROWID  
+			}
+	}
+	q grpID
+]]></Implementation>
+</Method>
+
+<Method name="Ascii">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>s</FormalSpec>
+<Implementation><![CDATA[	q $tr(s,"AÁÄBCČDĎEÉĚFGHIÍJKLĽĹMNŇOÓÖÔPQRŘŔSŠTŤUÚŮÜVWXYÝZŽaáäbcčdďeéěfghiíjklľĺmnňoóöôpqrřŕsštťuúůüvwxyýzž","AAABCCDDEEEFGHIIJKLLLMNNOOOOPQRRRSSTTUUUUVWXYYZZaaabccddeeefghiijklllmnnoooopqrrrssttuuuuvwxyyzz")
+]]></Implementation>
+</Method>
+
+<Method name="update">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id,nazov,url,kedy=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim sc = $$$OK
+	#dim ex as %Exception.AbstractException
+	#dim obj,nazovsk
+	try
+	{
+		s obj=##class(DF.MyLinks.Data.myLinks).%OpenId(id)
+		s nazovsk=obj.objskupina.nazov
+		i kedy'=""
+		{
+			s obj.Created=kedy
+		}
+		$$$THROWONERROR(sc,obj.SearchIndex.Clear())
+		$$$THROWONERROR(sc,obj.SearchIndex.Insert(..Ascii($zcvt($tr(nazov,","," "),"l"))))
+		$$$THROWONERROR(sc,obj.SearchIndex.Insert(..Ascii($zcvt($tr(nazovsk,","," "),"l"))))
+		$$$THROWONERROR(sc,obj.SearchIndex.Insert(..Ascii($zcvt($tr(url,","," "),"l"))))
+		$$$THROWONERROR(sc,obj.%Save())
+	}
+	catch ex
+	{
+		s sc=ex.DisplayString()
+	}
+	q sc
+]]></Implementation>
+</Method>
+
+<Trigger name="TRInsert">
+<Code>	s %ok=##class(DF.MyLinks.Data.myLinks).update({id},{nazov},{url},$zdt($h,3))
+	i %ok'=0
+	{
+		s %msg=%ok
+	}
+	q</Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="TRUpdate">
+<Code><![CDATA[	#dim dd,url
+	s dd=$zdt($h,3) 
+	s url={url}
+	&sql(insert into DF_MyLinks_Data.History (Url,Datum) Values(:url,:dd))
+	i SQLCODE
+	{
+		s %ok=0
+	}
+	else
+	{
+		s %ok=1
+		s %ok=##class(DF.MyLinks.Data.myLinks).update({id},{nazov*N},{url*N})
+		i %ok'=0
+		{
+			s %msg=%ok
+		}
+	}
+	q]]></Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.MyLinks.Data.myLinksD</DataLocation>
+<DefaultData>myLinksDefaultData</DefaultData>
+<IdLocation>^DF.MyLinks.Data.myLinksD</IdLocation>
+<IndexLocation>^DF.MyLinks.Data.myLinksI</IndexLocation>
+<StreamLocation>^DF.MyLinks.Data.myLinksS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="myLinksDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>url</Value>
+</Value>
+<Value name="3">
+<Value>nazov</Value>
+</Value>
+<Value name="4">
+<Value>objskupina</Value>
+</Value>
+<Value name="5">
+<Value>skupina</Value>
+</Value>
+<Value name="6">
+<Value>hits</Value>
+</Value>
+<Value name="7">
+<Value>showInTop</Value>
+</Value>
+<Value name="8">
+<Value>SearchIndex</Value>
+</Value>
+<Value name="9">
+<Value>SearchIdent</Value>
+</Value>
+<Value name="10">
+<Value>Created</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

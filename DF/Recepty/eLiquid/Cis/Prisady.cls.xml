@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Recepty.eLiquid.Cis.Prisady">
+<Super>%Persistent,DF.Private.Cis.Base.Spolocne</Super>
+<TimeCreated>62901,34972.041809</TimeCreated>
+
+<Property name="Vyrobca">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="Obchod">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="250"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="ObchodURL">
+<Type>Datatypes.URL</Type>
+</Property>
+
+<Property name="Cena">
+<Type>Datatypes.Currency</Type>
+<InitialExpression>0</InitialExpression>
+<Parameter name="NOOFDECIMALS" value="2"/>
+</Property>
+
+<Property name="Poznamka">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="15000"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="Objem">
+<Type>Datatypes.mlORkv</Type>
+<InitialExpression>10</InitialExpression>
+</Property>
+
+<Property name="Typ">
+<Description>
+0 - prichut, 1 - Baza</Description>
+<Type>%Integer</Type>
+<InitialExpression>0</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Aróma,Báza,Iné"/>
+<Parameter name="VALUELIST" value=",0,1,2"/>
+</Property>
+
+<Index name="KodIndex">
+<IdKey>1</IdKey>
+<PrimaryKey>1</PrimaryKey>
+<Properties>Kod</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Recepty.eLiquidFD7E.PrisadyD</DataLocation>
+<DefaultData>PrisadyDefaultData</DefaultData>
+<IdLocation>^DF.Recepty.eLiquidFD7E.PrisadyD</IdLocation>
+<IndexLocation>^DF.Recepty.eLiquidFD7E.PrisadyI</IndexLocation>
+<StreamLocation>^DF.Recepty.eLiquidFD7E.PrisadyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="PrisadyDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Vyrobca</Value>
+</Value>
+<Value name="3">
+<Value>Nazov</Value>
+</Value>
+<Value name="4">
+<Value>ObchodURL</Value>
+</Value>
+<Value name="5">
+<Value>Cena</Value>
+</Value>
+<Value name="6">
+<Value>Poznamka</Value>
+</Value>
+<Value name="7">
+<Value>Objem</Value>
+</Value>
+<Value name="8">
+<Value>Typ</Value>
+</Value>
+<Value name="9">
+<Value>Obchod</Value>
+</Value>
+<Value name="10">
+<Value>Platny</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

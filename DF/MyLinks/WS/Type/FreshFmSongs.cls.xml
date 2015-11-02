@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.MyLinks.WS.Type.FreshFmSongs">
+<Super>%RegisteredObject,%XML.Adaptor</Super>
+<TimeCreated>63855,45549.509579</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="Datum">
+<Type>%Date</Type>
+</Property>
+
+<Property name="SongName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="SongTime">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="50"/>
+</Property>
+
+<Property name="SongURL">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="PlayerURL">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+</Class>
+</Export>

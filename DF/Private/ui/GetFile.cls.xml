@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.ui.GetFile">
+<Super>%CSP.Page</Super>
+<TimeCreated>62532,52674.066988</TimeCreated>
+
+<Parameter name="TABLEWIDTH">
+<Default>800</Default>
+</Parameter>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="CHARSET">
+<Default>UTF-8</Default>
+</Parameter>
+
+<Method name="Page">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>skipheader:%Boolean=1</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	#dim parentId=%request.Get("parentId")
+    #dim strm As %GlobalCharacterStream
+    #dim rs as %ResultSet
+    #dim sc=$$$OK
+    #dim ex as %Exception.AbstractException
+    #dim error,strSQL,file,datum,pozn,suma,line=""
+    try
+    {
+	    s rs=##class(%ResultSet).%New()
+	    s strSQL="SELECT CONVERT(VARCHAR(8), ParentRef->Datum, 4) mdatum,CONVERT(VARCHAR(8), DatumSplatnosti, 4) DatumSplatnosti, '2197535154' MojUcet,$PIECE(UcetCely,'/',1) Ucet,$PIECE(UcetCely,'/',2) Banka, "_
+	    		 " Suma, 'EUR' Mena,isnull(VariabilnySymbol,9) vs,KonstantnySymbol->Kod ks,isnull(SpecifickySymbol,0) ss,isnull(SpravaPre,'dusan.fencik') SpravaPre, isnull(Poznamka,'dfencik') pozn"_
+				 " FROM DF_Private_Data.MainPolozky where ParentRef='"_parentId_"' and Platny=1"
+	    $$$THROWONERROR(sc,rs.Prepare(strSQL))
+	    $$$THROWONERROR(sc,rs.Execute())
+	    s strm=##class(%GlobalCharacterStream).%New(),error=""
+	    while rs.Next()
+	    {
+		    s datum=%request.Get("datum")  //rs.Data("DatumSplatnosti")
+		    s datum=$p(datum,".")_"."_$p(datum,".",2)_"."_($p(datum,".",3)-2000)
+		    s datum2=%request.Get("datum")  //rs.Data("DatumSplatnosti")
+		    s datum2=$p(datum,".",3)_$p(datum,".",2)_$p(datum,".")
+		    s file="prevod_"_datum2_".txt"
+		    s pozn=rs.Data("SpravaPre")
+		    s suma=$replace(rs.Data("Suma"),".",",")
+		    i $num(suma)'>0
+		    {
+		    	s error($i(error))=("<záznam s nulovou sumou>,"_datum_","_rs.Data("MojUcet")_","_rs.Data("Ucet")_","_rs.Data("Banka")_","_suma_","_rs.Data("Mena")_","_rs.Data("vs")_","_rs.Data("ks")_","_rs.Data("ss")_","_$s(pozn'="":""""_pozn_"""",1:""))
+		    }
+		    else
+		    {
+			    s suma=""""_suma_""""
+			    s line="1,"_datum_","_rs.Data("MojUcet")_","_rs.Data("Ucet")_","_rs.Data("Banka")_","_suma_","_rs.Data("Mena")_","_rs.Data("vs")_","_(+rs.Data("ks"))_","_rs.Data("ss")_","_$s(pozn'="":""""_pozn_"""",1:"")
+		    }
+		    d strm.WriteLine(line)
+	    }
+	    i $d(error)>9
+	    {
+	     	 s %="" f  s %=$o(error(%)) q:%=""  d strm.WriteLine(error(%))
+	    }
+	    k rs
+	    d %response.SetHeader("Content-Disposition","attachment; filename="_$s(error>0:"chyba_",1:"")_file)
+    	d %response.SetHeader("ContentType","application/octet-stream")
+    	$$$THROWONERROR(sc,%response.WriteHTTPHeader())
+	  	d strm.OutputToDevice()
+	  	d strm.%Close()
+		k strm
+    }
+    catch ex
+    {}
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	s %session.Preserve = 0 
+	s %response.Timeout=300
+   	s %response.Expires=60
+	q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

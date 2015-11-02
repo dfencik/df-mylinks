@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WEB.Components.combobox">
+<Abstract>1</Abstract>
+<ClassType/>
+<ProcedureBlock>1</ProcedureBlock>
+<TimeCreated>60837,57713.950857</TimeCreated>
+
+<Method name="DrawCombo">
+<Description>
+nova metoda na vykreslenie comboboxu
+name = nazov a id html prvku
+value = hodnota (selected) comba
+strSQL = sql prikaz, ktorym sa naplni combo
+valuecolumn = nazov stlpceka z SQL, ktory sa pouzije ako value v combe
+textcolumn = nazov stlpceka z SQL, ktory sa zobrazi v combe
+mydata = vlastny zoznam hodnot do comba ako %List, par value~column, od 23.11.2010 moze byt aj funkcia resp.classmethod ktora vrati %List napr.( $$func^macro("param") abo ##class(cls).method("param"))
+attributesstring = string, ktory sa vlozi do html prvku, tu su dalsie atributy ako onclick, disabled.
+na vyskladanie attributesstring je mozne pouzit metodu ##class(WEB.Util).PrepareAttrString(...)
+ValDispClsProp = nazov triedy a za dvojbodkou nazov vlastnosti z ktorej VALUELISTU a pripadne DISPLAYLISTU sa ma vyskladat combobox
+OnkeyPressMethod = Uzivatelska OnkeyPress metoda, nakolko editovatelne combo pouziva internu metodu na onkeypress
+OptGroupCollumn = nazov sledovaneho stlpca z databazy (vyberame data do komba cez sql prikaz), ktory bude pri zmene predstavovat nazov optgroup</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name="",value="",strSQL="",valuecolumn="",textcolumn="",mydata:%List="",attributesstring="",hasfirstline=0,ValDispClsProp="",Editable="0",OnkeyPressMethod="",isDisabled=0,OptGroupCollumn=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim recNo,cmbOut,selected,cmbVal,a,line,val,txt,inData,optGroupVal = ""
+	#dim optGroup = $tr(OptGroupCollumn," ")'=""
+	s cmbOut=""	
+	s inData=0
+	k cmData		
+	i Editable=1
+	{
+		i OnkeyPressMethod'=""
+		{
+			s onkp="if("_OnkeyPressMethod_") {comboEdit_A(event);} else {return false;}"
+		} 
+		else
+		{
+			s onkp="comboEdit_A(event);"
+		}
+		s attributesstring=attributesstring_" onKeyPress="""_onkp_""""
+	}
+	i isDisabled=1
+	{
+		s attributesstring=attributesstring_" disabled=""disabled"""
+	}
+	s cmbOut="<select"_$s(attributesstring'="":" "_attributesstring_" ",1:"")_" name="""_name_""" id="""_name_""""
+	s cmbOut=cmbOut_" class=""input-select"">"_$c(13,10)	
+	i hasfirstline
+	{
+		s cmbOut=cmbOut_"<option value="""">...</option>"_$c(13,10)
+	}
+	i strSQL'=""
+	{
+		s rs=##class(%ResultSet).%New()
+		s rs.RuntimeMode = 0
+    	i rs.Prepare(strSQL)
+    	{
+			d rs.Execute()
+			while rs.Next() 
+			{
+				s recNo=$i(recNo),selected = ""
+				s cmbVal=##class(%CSP.Page).EscapeHTML(rs.Data(valuecolumn))
+				s cmbData($c(32)_cmbVal)=""
+				i optGroup
+				{
+					i optGroupVal'=rs.Data(OptGroupCollumn) 
+					{
+						s:recNo>1 cmbOut=cmbOut_"</optgroup>"_$c(13,10)
+						s optGroupVal=rs.Data(OptGroupCollumn) 
+						s cmbOut=cmbOut_"<optgroup label="""_optGroupVal_""">"_$c(13,10)
+					}
+				}
+
+				i $g(rs.Data(valuecolumn)) = $g(value)
+				{
+				 	s selected = " selected ",inData=1
+				}
+				s cmbOut=cmbOut_"<option value="_$c(34)_cmbVal_$c(34)_" "_selected_">"
+				s cmbOut=cmbOut_##class(%CSP.Page).EscapeHTML(rs.Data(textcolumn))
+				s cmbOut=cmbOut_"</option>"_$c(13,10)
+			}
+			i optGroup,recNo>1 s cmbOut=cmbOut_"</optgroup>"_$c(13,10)
+		}
+    	d rs.%Close()
+    	k rs
+	}
+	
+	if ValDispClsProp'=""
+	{
+		s inData = 0
+		s valproperty=##class(%Dictionary.CompiledProperty).%OpenId($replace(ValDispClsProp,":","||"))
+		i $IsObject(valproperty)
+		{
+			s vallist=valproperty.Parameters.GetAt("VALUELIST")
+			s displist=valproperty.Parameters.GetAt("DISPLAYLIST")
+			s dispsep=""
+			i displist'=""
+			{
+				s dispsep=$e(displist)
+			}
+			i vallist'=""
+			{
+				s valsep=$e(vallist)
+				for a=2:1:$l(vallist,valsep)
+				{
+					s cmbData($c(32)_$p(vallist,valsep,a))=""
+					s mydata=mydata_$lb($p(vallist,valsep,a)_$s(dispsep'="":"~"_$p(displist,dispsep,a),1:""))
+				}
+			}
+		}
+	}
+	
+	s %mydata=""
+	i $ll(mydata)'=""
+	{
+		i $e($lg(mydata))="$"!($e($lg(mydata))="#")
+		{
+			x "s %mydata="_$lg(mydata)
+		}
+	}
+	i $ll(%mydata) s mydata=%mydata
+	f a = 1:1:$ll(mydata) 
+	{	
+		s selected = ""
+		s line=$lg(mydata,a)
+		s val=$p(line,"~",1)
+		s txt=$p(line,"~",2),txt=$s(txt="":val,1:txt)
+		s val=##class(%CSP.Page).EscapeHTML(val)
+		i val = $g(value) 
+		{
+			s selected = " selected ",inData=1
+		}
+		s cmbData($c(32)_val)=""
+		s cmbOut=cmbOut_ "<option value="_$c(34)_val_$c(34)_selected_">"_##class(%CSP.Page).EscapeHTML(txt)_"</option>"_$c(13,10)
+		
+	}
+	
+	i '$d(cmbData(" "_$g(value)))&(Editable)
+	{
+		s selected = " selected "
+		s cmbOut=cmbOut_ "<option value="_$c(34)_$g(value)_$c(34)_selected_">"_##class(%CSP.Page).EscapeHTML($g(value))_"</option>"_$c(13,10)
+	}
+	
+	
+	i 'inData,$g(value)'=""  ;,$ll(mydata)
+	{
+		s cmbOut=cmbOut_ "<option value="""_$g(value)_""" selected >"_##class(%CSP.Page).EscapeHTML($g(value))_" (hodnota chýba v DB)</option>"_$c(13,10)
+	}
+	
+	s cmbOut=cmbOut_"<"_"/select>"_$c(13,10)
+	k cmbData
+	q cmbOut
+]]></Implementation>
+</Method>
+</Class>
+</Export>

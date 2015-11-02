@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Cis.kSymboly">
+<Super>%Persistent,DF.Private.Cis.Base.Spolocne</Super>
+<TimeCreated>62530,33573.76692</TimeCreated>
+
+<Method name="read">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	#dim line
+	d ..%KillExtent()
+	s file=##class(%FileCharacterStream).%New()
+	s file.Filename="c:\!\VUB\ks.txt"
+	while 'file.AtEnd
+	{
+		s line=file.ReadLine()
+		s obj=..%New()
+		s obj.Kod=$$Trim^FUNC($p(line,"-"))
+		s obj.Nazov=$$Trim^FUNC($p(line,"-",2))
+		d obj.%Save()
+		k obj
+	}
+]]></Implementation>
+</Method>
+
+<Index name="KodIndex">
+<Properties>Kod</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Private.Cis.kSymbolyD</DataLocation>
+<DefaultData>kSymbolyDefaultData</DefaultData>
+<IdLocation>^DF.Private.Cis.kSymbolyD</IdLocation>
+<IndexLocation>^DF.Private.Cis.kSymbolyI</IndexLocation>
+<StreamLocation>^DF.Private.Cis.kSymbolyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="kSymbolyDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Kod</Value>
+</Value>
+<Value name="3">
+<Value>Nazov</Value>
+</Value>
+<Value name="4">
+<Value>Platny</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.ui.Home">
+<Super>WEB.Base.CSPPage</Super>
+<TimeCreated>62530,39147.644743</TimeCreated>
+
+<Parameter name="ENCODED">
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>0</Default>
+</Parameter>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	i %request.Get("logout")=1
+	{
+	    s %session.EndSession=1
+        s %response.Redirect=..Link("DF.Private.ui.Home.cls")
+        q 1
+    }
+	s %session.Language="sk"
+	//s %response.ServerSideRedirect="DF.Private.ui.Main.cls"
+	q 1
+]]></Implementation>
+</Method>
+
+<Method name="DrawPageContent">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	&html<
+	<p style="position:absolute;left:500px;top:auto;">
+		<a href="#(..Link("DF.Private.ui.Platby.cls"))#" title="Platby"><img src="pic/commercial-financing.gif"  style="height:100px;width:100px;" /></a>
+		<a href="#(..Link("DF.Private.ui.Data.MainObraty.cls"))#" title="Obraty"><img src="pic/Reports Line Chart.jpg"  style="height:100px;width:100px;" /></a>
+		<a href="#(..Link("DF.Recepty.eLiquid.ui.Data.Recepty.cls"))#" title="Miešanie liquidov - recepty"><img src="pic/eliquid.jpg" style="height:100px;width:100px;" /></a>
+		<a href="#(..Link("DF.Recepty.eLiquid.ui.Data.ReceptyBoxed.cls"))#" title="Miešanie liquidov - recepty"><img src="pic/eliquid.jpg" style="height:100px;width:100px;" /></a>
+		<a href="#(..Link("DF.Recepty.Kucharske.ui.Data.Recepty.cls"))#" title="Kuchárske recepty"><img src="pic/obedovat.jpg" style="height:100px;width:100px;" /></a>
+	</p>
+	>
+	q
+]]></Implementation>
+</Method>
+</Class>
+</Export>

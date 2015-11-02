@@ -1,0 +1,617 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Routine name="FUNC" type="MAC" languagemode="0"><![CDATA[
+FUNC
+ 
+az(a,b) q a_"-"_b
+ 
+Nazov(n) q $zcvt($e(n,1,15),"U")
+ 
+Text(%)  ;vylucenie ASCII znakov <32
+ n i,l,c s l=$l(%),c="" f i=1:1:l s:$a($e(%,i,i))>31 c=c_$e(%,i,i)
+ q c
+ 
+MesPre(dat) ;z obdobia RRRRMM vytvori 1.den predchadzaj.mesiaca
+ q $$MesDn(dat)
+ 
+MesDn(dat)
+ n r,m,ndat d mr(0)
+ q r_$e(m+100,2,3)_"01"
+ 
+MesKon(dat) ;z obdobia RRRRMM vytvori posled.den daneho mesiaca
+ q $$MesUp(dat)
+ 
+MesUp(dat)
+ n r,m,ndat d mr(1)
+ s ndat=(m\13+r)_$re(($e($re(m\13+m#13)_"0",1,2)))_"01"
+ q $$DateHor^FUNC($$DateHor^FUNC(ndat)-1)
+ 
+MesNas(dat) ;z obdobia RRRRMM vytvori 1.den nasleduj.mesiaca
+ n r,m,ndat d mr(1)
+ q (m\13+r)_$re($e($re(m\13+m#13)_"0",1,2))_"01"
+ 
+mr(p) s r=$e(dat,1,4),m=$e(dat,5,6) i p s m=m+1 q
+ i m-1<1 s r=r-1,m=12 q
+ s m=m-1
+ q
+ 
+DenNas(dat,pocet)
+ q $$DateHor^FUNC($$DateHor^FUNC(dat)+pocet)
+ 
+Dni(datz,datk) ;pocet dni
+ q:datz=""!(datk="") 0
+ n lud s lud=1+($$DateHor^FUNC(datk)-$$DateHor^FUNC(datz)) s:lud<0 lud=0
+ q lud
+ 
+zINT(od,do,ob) ;ob je z intervalu <od,do>
+ n i,j f i=1:1:3 s k=$p("od|do|ob","|",i) d:@k["/"
+ .i $e(@k,3)="/" s @k=$$o^PLK(@k) q
+ .s @k=$tr(@k,"/")
+ q od-1<ob&(do+1>ob)
+ 
+Trim(s) q:s="" s
+ n i,l,m                         ;odstranenie lavych aj pravych medzier
+ s s=$$Ltrim(s),l=$l(s),m=" " f i=l:-1:1 q:$e(s,i)'=m
+ q $s(s=m:"",1:$e(s,1,i))
+ 
+Ltrim(s)                         ;odstranenie lavych medzier
+ n i,l,m s l=$l(s),m=" " f i=1:1:l q:$e(s,i)'=m
+ q $s(s=m:"",1:$e(s,i,l))
+ 
+BanUct(buc) ;clenenie cisla bank.uctu
+ n kpu,uct,uct1,uct2,i
+ s kpu=$p(buc,"/",2),uct=$p(buc,"/"),uct1=$tr(uct,"-")
+ q:$l(uct1)<11 kpu_"|"_0_"|"_uct1
+ s uct2=$e(uct,1,$f(uct,"-")-2),i=kpu_"|"_uct2_"|"_$tr($p(uct,"-",2,9),"-")
+ i uct2'="",$l(uct2)<7 q:$l($p(uct,"-",2))<11 i
+ q kpu_"|"_$e(uct1,1,$l(uct1)-10)_"|"_$e(uct1,$l(uct1)-9,$l(uct1))
+ 
+kcuc(x) ;kontrola cisla bank.uctu
+ n i,vahy
+ ;i $l(x)>10 q 0
+ ;text z DTM: Pozn. pomlčka v čísle účtu na 4. mieste odzadu nie je významná a vyhadzuje sa.
+ s xot=$re(x) i $e(xot,4,4)="-" s xot=$e(xot,1,3)_$e(xot,5,$l(xot)),x=$re(xot)
+ s vahy="6,3,7,9,10,5,8,4,2,1",y=10,s=0
+ f i=$l(x):-1:1 s v=$p(vahy,",",y),s=v*$e(x,i)+s,y=y-1
+ s s=s#11
+ q 's
+ 
+KDE()
+	i ($d(%session))
+	{
+		i $IsObject(%session)
+		{
+			q $s(%session.Get("user_pobocka_kod","7000")=$c(0):7000,1:%session.Get("user_pobocka_kod","7000"))
+		}
+	}
+	else
+	{
+		q "0000"
+	}
+ 
+Date(dat)
+ n (dat)
+ s dat=$g(dat)
+ if dat="" q $zdate($h,8)
+ if $f(dat,".")>0
+ {
+         s datum=$zdate($zdateh($tr(dat,".","/"),4,,,,,,,""),8,,4,,,1000,,"")
+ }
+ else
+ {
+         s datum=$tr($zdate($zdateh(dat,8,,,,,,,""),4,,4,,,1000,,""),"/",".")
+ }
+ q datum
+ 
+DateHor(dat)
+ n (dat)
+ s dat=$g(dat)
+ s:dat="" dat=+$h
+ if dat<99999
+ {
+         q $zdate(dat,8,,,,,,,"")
+ }
+ else
+ {
+         q $zdateh(dat,8,,,,,,,"")
+ }
+ 
+Day(co)
+ n xx,pom
+ s xx=$$SetDCFormat^%NLS("WeekdayName",$C(44,78,101,100,101,190,97,44,80,111,110,100,101,108,111,107,44,85,116,111,114,111,107,44,83,116,114,101,100,97,44,138,116,118,114,116,111,107,44,80,105,97,116,111,107,44,83,111,98,111,116,97))
+ s pom=$zd(co,12)
+ s xx=$$SetDCFormat^%NLS("WeekdayName",xx)
+ q $$WinToLat(pom)
+ 
+zapis(subor,co,novy)
+ n file
+ i $g(subor)="" s subor="c:\BLUD.txt"
+ Set file=##class(%File).%New(subor)
+ if (novy=1)
+ {
+  do file.Open("WSN")
+ }
+ else
+ {
+  i ##class(%File).Exists(subor) {d file.Open("RWSA") } //A znamena ADD
+  else {d file.Open("WSN")}
+ }
+ d file.WriteLine(co)
+ d file.Close()
+ q
+otvorSubor(subor,file)
+  i $g(subor)="" s subor="c:\BLUD.txt"
+  Set file=##class(%File).%New(subor)
+  d file.Open("WNS")
+  q
+zapisRiadok(co,subor)
+ d subor.WriteLine(co)
+ q
+zavriSubor(subor)
+ d subor.Close()
+ q
+ //WIN CP1250 ASCII pre "aáäbc?d?eé?ëfghiíjkl??mn?oóôö?pr??stuú?ü?vyýz"
+ //97,225,228,98,99,232,100,239,101,233,236,235,102,103,104,105,237,106,107,108,229,190,109,110,242,111,243,244,246,245,112,114,224,248,115,154,116,157,117,250,249,252,251,118,121,253,122,158
+ //WIN CP1250 ASCII pre "AÁÄBC?D?EÉ?ËFGHIÍJKL??MN?OÓÔÖ?PR??STUÚ?Ü?VYÝZ"
+ //65,193,196,66,67,200,68,207,69,201,204,203,70,71,72,73,205,74,75,76,197,188,77,78,210,79,211,212,214,213,80,82,192,216,83,138,84,141,85,218,217,220,219,86,89,221,90,142
+ //LATIN2 DOS ASCII pre "aáäbc?d?eé?ëfghiíjkl??mn?oóôö?pr??stuú?ü?vyýz"
+ //97,160,132,98,99,159,100,212,101,130,216,137,102,103,104,105,161,106,107,108,146,150,109,110,229,111,162,147,148,139,112,114,234,253,115,231,116,156,117,163,133,129,251,118,121,236,122,167
+ // a,  á,  ä, b, c,  ?,  d,  ?,  e,  é,  ?,  ë,  f,  g,  h,  i,  í,  j,  k,  l,  ?,  ?,  m,  n,  ?,  o,  ó,  ô,  ö,  ?,  p,  r,  ?,  ?,  s,  ,  t,  ,  u,  ú,  ?,  ü,  ?,  v,  y,  ý,  z,  
+ //LATIN2 DOS ASCII pre "AÁÄBC?D?EÉ?ËFGHIÍJKL??MN?OÓÔÖ?PR??STUÚ?Ü?VYÝZ"
+ //65,181,142,66,67,172,68,210,69,144,183,211,70,71,72,73,214,74,75,76,145,149,77,78,213,79,224,226,153,138,80,82,232,252,83,230,84,155,85,233,222,154,235,86,89,237,90,166
+ // A,  Á,  Ä, B, C,  ?, D,  ?, E,  É,  ?,  Ë, F, G, H, I,  Í, J, K, L,  ?,  ?, M, N,  ?, O,  Ó,  Ô,  Ö,  ?, P, R,  ?,  ?, S,  , T,  , U,  Ú,  ?,  Ü,  ?, V, Y,  Ý, Z,  
+ /*UpperCase(co) //LATIN2 UpperCase
+ n (co)
+ q $tr(co,$c(97,160,132,98,99,159,100,212,101,130,216,137,102,103,104,105,161,106,107,108,146,150,109,110,229,111,162,147,148,139,112,114,234,253,115,231,116,156,117,163,133,129,251,118,121,236,122,167),$c(65,181,142,66,67,172,68,210,69,144,183,211,70,71,72,73,214,74,75,76,145,149,77,78,213,79,224,226,153,138,80,82,232,252,83,230,84,155,85,233,222,154,235,86,89,237,90,166))*/
+UpperCase(co) //prerobene na normal uppercase
+	n (co)
+	q $zcvt(co,"U")
+UpperCaseWin(co) //win UpperCase
+ n (co)
+ q $tr(co,$C(97,225,228,98,99,232,100,239,101,233,236,235,102,103,104,105,237,106,107,108,229,190,109,110,242,111,243,244,246,245,112,114,224,248,115,154,116,157,117,250,249,252,251,118,121,253,122,158),$C(65,193,196,66,67,200,68,207,69,201,204,203,70,71,72,73,205,74,75,76,197,188,77,78,210,79,211,212,214,213,80,82,192,216,83,138,84,141,85,218,217,220,219,86,89,221,90,142))
+ /*ascii(co)
+ n (co)
+ q $tr(co,$C(65,181,142,66,67,172,68,210,69,144,183,211,70,71,72,73,214,74,75,76,145,149,77,78,213,79,224,226,153,138,80,82,232,252,83,230,84,155,85,233,222,154,235,86,89,237,90,166,97,160,132,98,99,159,100,212,101,130,216,137,102,103,104,105,161,106,107,108,146,150,109,110,229,111,162,147,148,139,112,114,234,253,115,231,116,156,117,163,133,129,251,118,121,236,122,167),$C(65,65,65,66,67,67,68,68,69,69,69,69,70,71,72,73,73,74,75,76,76,76,77,78,78,79,79,79,79,79,80,82,82,82,83,83,84,84,85,85,85,85,85,86,89,89,90,90,97,97,97,98,99,99,100,100,101,101,101,101,102,103,104,105,105,106,107,108,108,108,109,110,110,111,111,111,111,111,112,114,114,114,115,115,116,116,117,117,117,117,117,118,121,121,122,122))*/
+ascii(co) //prerobene na normal
+ n (co)
+ s lower="äáâăčćçďéęëěíîĺľňńóôőöŕřšśťúůűüýž"
+ s upper="ÄÁÂĂČĆÇĎÉĘËĚÍÎĹĽŇŃÓÔŐÖŔŘŠŚŤÚŮŰÜÝŽ"
+ s ascii="aaaacccdeeeeiillnnoooorrsstuuuuyz"
+ s ascii=ascii_"AAAACCCDEEEEIILLNNOOOORRSSTUUUUYZ"
+ q $tr(co,lower_upper,ascii)
+acs(s)
+ n (s)
+ //vsetky povoden veci sa rusia, budeme vracat to, co sem pride bez zmeny
+ //kedze ^SYScs je v DTM nastavene na "LATIN" tak...
+ //i $g(^SYScs)="LATIN" q $$acsl(s)
+ //q $$acsl(s)
+ //s win=$tr(s,$c(160,132,159,212,130,216,161,146,150,229,162,147,148,234,253,231,156,163,129,133,167,236,181,142,172,210,144,183,214,145,149,213,224,226,153,232,252,230,155,233,154,222,166,237),$c(225,228,232,239,233,236,237,190,190,242,243,244,246,224,248,154,157,250,252,249,158,253,193,196,200,207,201,204,205,197,188,210,211,212,214,192,216,138,141,218,220,217,142,221))
+ //s win2=$tr(win,"AÁÄBC?D?EÉ?FGHIÍJKL??MN?OÓÖÔPQR??STUÚ?ÜVWXYÝZaáäbc?d?eé?fghiíjkl??mn?oóöôpqr??stuú?üvwxyýz","ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?üé?ä?????Í??ÄÁÉôöÓ?ÚýÖÜ?Ý?áíóú???Ô???")
+ //q $tr(win2,$c(225,228,232,239,233,236,237,190,190,242,243,244,246,224,248,154,157,250,252,249,158,253,193,196,200,207,201,204,205,197,188,210,211,212,214,192,216,138,141,218,220,217,142,221),$c(160,132,159,212,130,216,161,146,150,229,162,147,148,234,253,231,156,163,129,133,167,236,181,142,172,210,144,183,214,145,149,213,224,226,153,232,252,230,155,233,154,222,166,237))
+ q s
+ 
+acsl(s)
+ n (s)
+ //vsetky povoden veci sa rusia, budeme vracat to, co sem pride bez zmeny
+ /*s win=$tr(s,$c(160,132,159,212,130,216,161,146,150,229,162,147,148,234,253,231,156,163,129,133,167,236,181,142,172,210,144,183,214,145,149,213,224,226,153,232,252,230,155,233,154,222,166,237),$c(225,228,232,239,233,236,237,190,190,242,243,244,246,224,248,154,157,250,252,249,158,253,193,196,200,207,201,204,205,197,188,210,211,212,214,192,216,138,141,218,220,217,142,221))
+ s win2=$tr(win,$C(65,193,196,66,67,200,68,207,69,201,204,70,71,72,73,205,74,75,76,188,197,77,78,210,79,211,214,212,80,81,82,216,192,83,138,84,141,85,218,217,220,86,87,88,89,221,90,142,97,225,228,98,99,232,100,239,101,233,236,102,103,104,105,237,106,107,108,190,229,109,110,242,111,243,246,244,112,113,114,248,224,115,154,116,157,117,250,249,252,118,119,120,121,253,122,158),$C(65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,252,233,228,249,196,201,197,229,244,246,188,190,214,220,141,157,232,225,237,243,250,142,158,200,193,204,207,239,210,205,236,217,211,212,242,138,154,192,218,224,253,221,216,248))
+ q $tr(win2,$c(225,228,232,239,233,236,237,190,190,242,243,244,246,224,248,154,157,250,252,249,158,253,193,196,200,207,201,204,205,197,188,210,211,212,214,192,216,138,141,218,220,217,142,221),$c(160,132,159,212,130,216,161,146,150,229,162,147,148,234,253,231,156,163,129,133,167,236,181,142,172,210,144,183,214,145,149,213,224,226,153,232,252,230,155,233,154,222,166,237))*/
+ q s
+ 
+csal(s)
+ n (s)
+ //vsetky povoden veci sa rusia, budeme vracat to, co sem pride bez zmeny
+ /*
+ s win=$tr(s,$c(160,132,159,212,130,216,161,146,150,229,162,147,148,234,253,231,156,163,129,133,167,236,181,142,172,210,144,183,214,145,149,213,224,226,153,232,252,230,155,233,154,222,166,237),$c(225,228,232,239,233,236,237,190,190,242,243,244,246,224,248,154,157,250,252,249,158,253,193,196,200,207,201,204,205,197,188,210,211,212,214,192,216,138,141,218,220,217,142,221))
+ s win2=$tr(s,$C(65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,252,233,228,249,196,201,197,229,244,246,188,190,214,220,141,157,232,225,237,243,250,142,158,200,193,204,207,239,210,205,236,217,211,212,242,138,154,192,218,224,253,221,216,248),$C(65,193,196,66,67,200,68,207,69,201,204,70,71,72,73,205,74,75,76,188,197,77,78,210,79,211,214,212,80,81,82,216,192,83,138,84,141,85,218,217,220,86,87,88,89,221,90,142,97,225,228,98,99,232,100,239,101,233,236,102,103,104,105,237,106,107,108,190,229,109,110,242,111,243,246,244,112,113,114,248,224,115,154,116,157,117,250,249,252,118,119,120,121,253,122,158))
+ q $tr(win2,$c(225,228,232,239,233,236,237,190,190,242,243,244,246,224,248,154,157,250,252,249,158,253,193,196,200,207,201,204,205,197,188,210,211,212,214,192,216,138,141,218,220,217,142,221),$c(160,132,159,212,130,216,161,146,150,229,162,147,148,234,253,231,156,163,129,133,167,236,181,142,172,210,144,183,214,145,149,213,224,226,153,232,252,230,155,233,154,222,166,237))*/
+ q s
+ 
+LatToWin(co)
+ n (co)
+ q $tr(co,$c(160,132,159,212,130,216,137,161,146,150,229,162,147,148,139,234,253,231,156,163,133,129,251,236,167,181,142,172,210,144,183,211,214,145,149,213,224,226,153,138,232,252,230,155,233,222,154,235,237,166),$c(225,228,232,239,233,236,235,237,229,190,242,243,244,246,245,224,248,154,157,250,249,252,251,253,158,193,196,200,207,201,204,203,205,197,188,210,211,212,214,213,192,216,138,141,218,217,220,219,221,142))
+ 
+ //ASCI KODY WIN CP1250 pre "áä??é?ëí???óôö???ú?ü?ýÁÄ??É?ËÍ???ÓÔÖ???Ú?Ü?Ý"
+ //225,228,232,239,233,236,235,237,229,190,242,243,244,246,245,224,248,154,157,250,249,252,251,253,158,193,196,200,207,201,204,203,205,197,188,210,211,212,214,213,192,216,138,141,218,217,220,219,221,142
+ //ASII KODY LATIN2 DOS pre "áä??é?ëí???óôö???ú?ü?ýÁÄ??É?ËÍ???ÓÔÖ???Ú?Ü?Ý"
+ //160,132,159,212,130,216,137,161,146,150,229,162,147,148,139,234,253,231,156,163,133,129,251,236,167,181,142,172,210,144,183,211,214,145,149,213,224,226,153,138,232,252,230,155,233,222,154,235,237,166
+WinToLat(co)
+ n (co)
+ q $tr(co,$c(225,228,232,239,233,236,235,237,229,190,242,243,244,246,245,224,248,154,157,250,249,252,251,253,158,193,196,200,207,201,204,203,205,197,188,210,211,212,214,213,192,216,138,141,218,217,220,219,221,142),$c(160,132,159,212,130,216,137,161,146,150,229,162,147,148,139,234,253,231,156,163,133,129,251,236,167,181,142,172,210,144,183,211,214,145,149,213,224,226,153,138,232,252,230,155,233,222,154,235,237,166))
+ 
+DirExists(dir)
+ q ##class(%File).DirectoryExists(dir)
+ 
+GetIndex(%r)
+ i $g(%r)="" q ""
+ n %i
+ s %i=$p($p(%r,")",1,$l(%r,")")-1),"(",2,99) i %i="" q ""
+ s %i=$re(%i)
+ i $e(%i)'="""" s %i=$re($p(%i,",")) s:%i'?.n %i=$g(@%i) q %i
+ n %k,%j
+ f %j=1:1 s %k=$re($p(%i,",",1,%j)) i $l(%k,"""")#2,$e(%k)="""" q
+ s @("%k="_%k)
+ q %k
+ 
+Month(d)
+ n (d)
+ s d=$g(d)
+ s $p(d,".",2)=$p($C(74,97,110,117,225,114,44,70,101,98,114,117,225,114,44,77,97,114,101,99,44,65,112,114,237,108,44,77,225,106,44,74,250,110,44,74,250,108,44,65,117,103,117,115,116,44,83,101,112,116,101,109,98,101,114,44,79,107,116,243,98,101,114,44,78,111,118,101,109,98,101,114,44,68,101,99,101,109,98,101,114),",",$tr($p(d,".",2)," ",""))
+ q d
+ 
+st(s)
+ n (s)
+ //vsetky povoden veci sa rusia, budeme vracat to, co sem pride bez zmeny
+ /*s s=$$LatToWin^FUNC(s)
+ s s=$tr(s,$C(193,225,201,204,233,236,205,237,211,212,243,244,218,217,250,249,221,253),"AaEEeeIiOOooUUuuYy")
+ s s=$$WinToLat^FUNC(s)
+ q $$acs(s)*/
+ q s
+ 
+ //vrati vek k datumu v "ku", ak ku="" tak k aktualnemu dnu, dnr musi byt v tvare YYYYMMDD
+vek(dnr,ku)
+ n (dnr,ku)
+ s ku=$g(ku)
+ s:ku="" ku=$ZD($h,8)
+ q (ku-dnr)\10000
+ 
+vekrc(RC,ku)
+ n (RC,ku)
+ i $f(RC,"/")=0
+ {
+ 	s RC=$e(RC,1,6)_"/"_$e(RC,7,$l(RC))
+ }
+ s %=$e(RC,3)
+ s %=$s(%<2:%,%=5:0,%=6:1,1:7)
+ q:%=7 199
+ s $e(RC,3)=%
+ s DNR=$s($l($p(RC,"/",2))=3:19_$e(RC,1,6),1:$s($e(RC,1,2)>($e($$Date^FUNC(),1,2)):19_$e(RC,1,6),1:20_$e(RC,1,6)))
+ q $$vek(DNR,ku)
+kkk
+	n	
+	s i=""
+	f {
+		s i=$o(^RGPindex("MEN",i))
+		q:i=""
+		w $$LatToWin^FUNC($$csal^FUNC(i)),*13
+		h 1
+	}
+	q
+ 
+Time(t)
+	;
+    ;Prevod casu z HH:MM:SS do HHMMSS a nazad
+    ;---------------------------------------
+	i $g(t)="" s t=$$jn($p($h,",",2),5) q t
+	i t?1n.n q $$jn(t\3600,2)_":"_$$jn(t\60#60,2)_":"_$$jn(t#60,2)
+	q $p(t,":",1)*3600+($p(t,":",2)*60)+$p(t,":",3)
+    
+TimeDek(c)
+	n %h,%m,%s
+	i $g(c)="" s c=$$Time($$Time())
+	i c?1n.n q $$jn(c\10000,2)_":"_$$jn(c#10000\100,2)_":"_$$jn(c#100,2)
+	s %h=$p(c,":",1),%m=$p(c,":",2),%s=$p(c,":",3)
+	i %h<25,%m<61,%s<61,%h>-1,%m>-1,%s>-1
+	e  q ""
+	q $$jn(%h*10000+(%m*100)+%s,6)	
+	
+DateTime(h)
+	q $$DateTimeDek($g(h))
+DateTimeDek(h)
+    i h[" " q $$Date($p(h," ",1))*1000000+$$TimeDek($p(h," ",2))
+    i $g(h)="" q $$Date()*1000000+$$TimeDek()
+    q $$Date(h\1000000)_" "_$$TimeDek(h#1000000)
+ 
+WndOpen(col,line,width,height,wc,bc,caption,caption2,caption3,caption4)
+	q 1
+	n border,wfc,wbc,bfc,bbc
+	//farby:
+	//0=cierna
+	//1=modra
+	//2=zelena
+	//3=cyan (svetlomodra)
+	//4=cervena
+	//5=fialova
+	//6=zlta
+	//7=biela
+	s wc=$g(wc),bc=$g(bc),caption=$g(caption),border=3
+	s:bc="" border=0
+	s wfc=$e(wc)
+	s wbc=$e(wc,2,2)
+	s bfc=$e(bc)
+	s bbc=$e(bc,2,2)
+	s wbc=$s("Ww"[wbc:7,"Cc"[wbc:3,"Rr"[wbc:4,"Bb"[wbc:1,"Gg"[wbc:2,"Mm"[wbc:5,"Yy"[wbc:6,1:wbc)
+	s wfc=$s("Ww"[wfc:7,"Cc"[wfc:3,"Rr"[wfc:4,"Bb"[wfc:1,"Gg"[wfc:2,"Mm"[wfc:5,"Yy"[wfc:6,1:wfc)
+	s bbc=$s("Ww"[bbc:7,"Cc"[bbc:3,"Rr"[bbc:4,"Bb"[bbc:1,"Gg"[bbc:2,"Mm"[bbc:5,"Yy"[bbc:6,1:bbc)
+	s bfc=$s("Ww"[bfc:7,"Cc"[bfc:3,"Rr"[bfc:4,"Bb"[bfc:1,"Gg"[bfc:2,"Mm"[bfc:5,"Yy"[bfc:6,1:bfc)
+	//b
+	//d useterm^CacheFiles 0::"^%XDTM2"
+	w /WOPEN(col,line,width,height,border,"","",caption,"tl","",wfc,wbc,bfc,bbc)
+	//w /AA
+	q col_","_line_","_width_","_height
+WndClose(%)
+	q 1
+	w /WCLOSE
+	q 1
+AttWindow(col,line,text,wc,bc)
+	q 1
+	n wfc,wbc
+	s wc=$g(wc),bc=$g(bc),text=$g(text)
+	s wfc=$e(wc)
+	s wbc=$e(wc,2,2)
+	s bfc=$e(bc)
+	s bbc=$e(bc,2,2)
+	s wbc=$s("Ww"[wbc:7,"Cc"[wbc:3,"Rr"[wbc:4,"Bb"[wbc:1,"Gg"[wbc:2,"Mm"[wbc:5,"Yy"[wbc:6,1:wbc)
+	s wfc=$s("Ww"[wfc:7,"Cc"[wfc:3,"Rr"[wfc:4,"Bb"[wfc:1,"Gg"[wfc:2,"Mm"[wfc:5,"Yy"[wfc:6,1:wfc)
+	s bbc=$s("Ww"[bbc:7,"Cc"[bbc:3,"Rr"[bbc:4,"Bb"[bbc:1,"Gg"[bbc:2,"Mm"[bbc:5,"Yy"[bbc:6,1:bbc)
+	s bfc=$s("Ww"[bfc:7,"Cc"[bfc:3,"Rr"[bfc:4,"Bb"[bfc:1,"Gg"[bfc:2,"Mm"[bfc:5,"Yy"[bfc:6,1:bfc)
+	w /WOPEN(col,line,$s($l(text)<25:25,1:$l(text)+3),1,3,"","","Stlac lubovolny klaves","br","",wfc,wbc,bfc,bbc)
+	w /VF
+	w text
+	s vstup=""
+	r *vstup
+	w /WCLOSE
+	q col_","_line
+YesNo(%x,%y,%t,%v,%h,%c,%f,%i)
+	q 1
+        n %,%s,%o,navrat
+        s %c=$g(%c),%t=$g(%t),%v=+$g(%v),%s=$l(%t)+4,%h=$g(%h),%f=$g(%f)
+        s %i=$g(%i) s:%c="" %f="Wc",%c="Wc",%i="Wc" s:%f="" %f=%c
+        s:%i="" %i=%c s:%s<15 %s=15
+        s %o=$$WndOpen(%x,%y,%s+2,3,%c,%f," Áno/Nie ")
+        w %t_" "
+        s %t=$$wyn()
+        s navrat=$$WndClose^FUNC(%o)
+        q %t
+ 
+wyn()
+wynr	s %="Nie"
+	w %,/cub($l(%))
+	r %
+	w /cub($l(%)),/ech($l(%))
+	s:%="" %="Nie"
+	i "ÁAáaNn"[$e(%,1)
+	{
+		s %=$tr($e(%,1),"aán","ÁÁN")
+		s %=$s(%="N":0,1:1)
+	}
+	else
+	{
+		g wynr
+	}
+	q %
+Whoami()
+	n rett
+	s rett=1_"|"_$ZU(110)_"|"_0_"|SPRAVCA|%MENU^%MLmonit|731581;"
+	i $d(%session)
+	{
+		i $IsObject(%session)
+		{
+			s rett=%session.Get("user_hid")_"|"_%session.Get("user_cele_meno")_"|"_0_"|SKUPINA|%MENU^%MLmonit|"_%session.Get("user_telefon")
+		}
+	}
+	q rett
+	/*
+Telefon(user)
+	n telefon
+	s telefon=""
+	i user'=""
+	{
+		s user=$zcvt(user,"U")
+		&sql(select telefon into :telefon from mt_DATA_sManager."User" where UPPER(REPLACE(CeleMeno,',',' '))=:user)
+		i SQLCODE'=0
+		{
+			i $d(%session)
+			{
+				i $IsObject(%session)
+				{
+					s telefon=%session.Get("user_telefon")
+				}
+			}
+		}
+	}
+	q telefon
+ 	*/
+KTO(%)	;Autor
+	;default - 2, inak číslo poľa, 0 - celý reťazec
+	n p,r
+	s p=$g(%) s:p="" p=2
+	s r=$$Whoami
+	i p s r=$p(r,"|",p)
+	q r
+	
+JustE(co,znak,kolko)
+	n (co,znak,kolko)
+	s len=$l(co)
+	i (len>kolko)
+	{
+	 	s co=$e(co,(len-kolko+1),len)
+	}
+	else
+	{
+		s co=$tr($j("",kolko-len)," ",znak)_co
+	}
+	q co
+	
+Just(t,z,l)
+	//Doplni udaj zleva znakem z
+	n %
+    s %="",$p(%,z,l+1)=%,%=%_t
+    q $e(%,$l(%)-l+1,$l(%))
+    
+jn(n,l) 
+	//Doplni ciselny udaj nulou z leva
+	n %
+    s %="",$p(%,0,l+1)=%,%=%_n
+    q $e(%,$l(%)-l+1,$l(%))
+JustZero(n,l)
+	q $$jn(n,l)
+    
+JustR(t,l,z)
+	//Doplni udaj zprava znakem z
+	s z=$g(z) s:z="" z=" " s t=$e(t,1,l)
+    i $l(t)<l s t=t_$$Just("",z,l-$l(t))
+    q t
+ 
+i()	q $i(^tmpMDX)
+ /*replace(retazec,old,new)
+	n len,lenn,pos,lenret
+	s len=$l(old)
+	s lenn=$l(new)
+	s pos=$f(retazec,old)
+	while (pos>0)
+	{
+		s lenret=$l(retazec)
+		s retazec=$e(retazec,1,pos-1-len)_new_$e(retazec,pos,lenret)
+		s pos=$f(retazec,old,pos+(lenn-len))
+		
+	}
+	q retazec*/
+replace(%00,%0A,%0B)
+ q $$REPL(%00,%0A,%0B)
+REPL(%00,%0A,%0B) 
+ ; -- FUNCTION: replace string %0A with string %0B in string %00, VH --
+ ; in :%00,%0A,%0B
+ ; http://jacquardsystems.com/MComputing/1999/1/p33.htm
+ N D,DA,F
+ Q:'$L(%0A) %00
+ Q:%00'[%0A %00
+ S F=$F(%00,%0A),DA=$L(%0A),D=$L(%0B)-DA
+ F  S $E(%00,F-DA,F-1)=%0B,F=$F(%00,%0A,F+D) Q:'F
+ Q %00
+WriteFile(fil,linefun)
+	s fil=$p(fil,"\",1)
+	s strm=##class(mt.DATA.TMP.CharacterStream).%New()
+	d strm.TMPStream.WriteLine("")
+	d strm.TMPStream.SaveStream()
+	s sc=strm.%Save()
+	s strmid=strm.%Id()
+	d strm.%Close()
+	k strm
+	d ##class(mt.DATA.TMP.CharacterStream).%DeleteId(strmid)
+	q
+AddWeekDay(dat,pocet)
+	//k zadanemu datumu "dat" v tvare horolog prirata "pocet" pracovnych dni
+	//teda ak napr. dat bude sobota a pocet bude 1, vrati utorok
+	//cize sobota a nedela sa rata akoby to bol pondelok a k nemu sa prirataju dni
+	//Vracia datum v tvare horolog
+	n (dat,pocet)
+	s den=$zd(dat,10)
+	s ret=$s(den=0:dat+1,den=6:dat+2,1:dat)
+	f i=1:1:(pocet)
+	{
+		s ret=ret+1
+		s den=$zd(ret,10)
+		if den=6
+		{
+			s ret=ret+2
+		}
+	}
+	q ret
+BitAnd(val,position)
+	n (val,position)
+	q $BIT($FACTOR(val),position)
+	
+	//porovna val na null a $c(0) a ak sa rovna, vrati znak, inak vrati val
+mtxisnull(val,znak)
+	n (val,znak)
+	s znak=$g(znak)
+	q $s((val=$c(0)!(val="")):znak,1:val)
+	
+	//vrati 1, ak val=$c(0) alebo val="", inak vrati 0
+mtxnull(val)
+	n (val)
+	q $s((val=$c(0)!(val="")):1,1:0)
+	//odpali medzery z konca stringu
+zstrip(what)
+	n (what)
+	q $zstrip(what,">"," ")
+	
+ 	//Vrati sumu SLOVOM
+SumaSlovo(sk)
+        s sk=$zabs($g(sk))\1
+        q:sk>999999!'sk ""
+        n %,i,d,q,s,t,text s sk=1000000+sk,%="",q=1
+		s text="jeden|dve|tri|štyri|päť|šesť|sedem|osem|deväť|desať|jedenásť|dvanásť|trinásť|štrnásť|pätnásť|šestnásť|sedemnásť|osemnásť|devätnásť|dvadsať"
+        f t=1:-1:0 s s=$e(sk,q+1,q+3) d:s  s q=q+3
+        .d
+        ..s i=s\100 i i s %=%_$s(i>1:$p(text,"|",i),1:"")_"sto"
+        ..s i=s#100 i i<21 s %=%_$p(text,"|",i) q
+        ..s d=i\10,i=i#10 d:d  s %=%_$s(i=2:"dva",1:$p(text,"|",i))
+		...s %=%_$s(d>2:$p(text,"|",d)_$p("dsať|desiat","|",(d>4+1)),1:"dvadsať")
+		.s:t %=%_$p("tisíc|milión","|",t)
+		q $zcvt($e(%,1),"U")_$e(%,2,$l(%))
+ 
+ //vrati prepocitanu hodnotu (amount) fixnym kurzom, so zaokruhlenim (roundto)
+ //ak onlyrate=1, vrati KURZ (30.126)
+ //direction - urcuje smer prevodu, ak =0, tak SK->EUR, ak=1, tak EUR->SK
+Euro(amount,roundto=2,onlyrate=0,direction=0)
+ i onlyrate=1
+ {
+	 q 30.126
+ }
+ else
+ {
+	 i direction=1
+	 {
+ 		q $j(amount*30.126,0,roundto)
+	 }
+	 else
+	 {
+		q $j(amount/30.126,0,roundto) 
+	 }
+ }
+ 
+ //Do datumu zaciatku a po konci dualneho zobrazovania vrati prazdny znak.
+ //Inak vrati hodnotu "sum" prepocitanu fixnym kurzom v tvare podla parametra "typ", alebo formulku
+ //sum musí byť číslo - inak vrati prazdny znak
+ //typ=0 (alebo neuvedeny, alebo hocico ine) - vrati iba sumu zaokruhlenu na 2 des. miesta
+ //typ=1 - vrati sumu s oddelovacmi tisicov bodkou a desatinnou ciarkou a menou
+ //typ=2 - vrati ako typ=1, ale este v zatvorke a s hviezdickou
+ //typ=3 - vrati formulku
+ //typ=4 - ako typ 2, ale vrati aj povodnu aj dualnu sumu (tu v zatvorke) ale iba pre RTF! (povodna suma bude tucna a dualna mensia)
+ //skusDnes - sluzi na skusanie,testovanie dnesneho datumu - (od 1.8.2008 sa uz neberie do uvahy)
+Dual(sum,typ,skusDnes)
+ n KURZ,DualZac,DatKonv,DualKon,dnes,note,rate
+ s typ=$g(typ,4)
+ s KURZ=$$Euro(,,1)  //fixný konverzný kurz
+ s DualZac=20080801  //začiatok duálneho zobrazovania
+ s DatKonv=20090101  //dátum euro konverzie
+ s DualKon=20091231  //koniec duálneho zobrazovania
+ s dnes=$s($g(skusDnes)'="":skusDnes,1:$$Date())	//na skusanie
+ s:$$Date()>=DualZac dnes=$$Date()					//"istota"
+ i typ=4
+ {
+	s rate="{\b "_$fn(sum,".",2)_$s(dnes<DatKonv:" Sk",1:" €")_"}"
+	i ((dnes>=DualZac)&(dnes<=DualKon))
+	{
+		if dnes<DatKonv
+	 	{
+	 		s rate=rate_" {\fs20 ("_$fn(sum/KURZ,".",2)_" €)* }"
+	 	}
+	 	else
+	 	{
+	 		s rate=rate_" {\fs20 ("_$fn(sum*KURZ,".",2)_" Sk)* }"
+	 	}
+	}
+ 	q rate
+ }
+ q:((dnes<DualZac)||(dnes>DualKon)) ""
+ s:$g(typ)="" typ=0
+ q:typ=3 "* Výsledná suma bola prepočítaná fixným konverzným kurzom 1€ = "_$fn(KURZ,".",4)_" Sk"
+ s sum=$g(sum)
+ q:sum'?.1"-"1.n.1".".n ""
+ s rate=""
+ if dnes<DatKonv
+ {
+ 	s rate=$s(typ=1:$fn(sum/KURZ,".",2)_" €",typ=2:"("_$fn(sum/KURZ,".",2)_" €)*",1:$fn(sum/KURZ,"",2))
+ }
+ else
+ {
+ 	s rate=$s(typ=1:$fn(sum*KURZ,".",2)_" Sk",typ=2:"("_$fn(sum*KURZ,".",2)_" Sk)*",1:$fn(sum*KURZ,"",2))
+ }
+ q rate
+ 
+Mena() q $s($$Date()>=20090101:"€",1:"Sk")
+]]></Routine>
+</Export>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.MyLinks.Data.FreshFMsongs">
+<Super>%Persistent</Super>
+<TimeCreated>63855,45136.883437</TimeCreated>
+
+<Property name="SongName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="SongTime">
+<Type>%String</Type>
+</Property>
+
+<Property name="SongURL">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="PlayerURL">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Index name="iSongName">
+<Properties>SongName</Properties>
+</Index>
+
+<Property name="ParentRef">
+<Type>DF.MyLinks.Data.FreshFM</Type>
+<Cardinality>parent</Cardinality>
+<Inverse>Songs</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Method name="SaveSongs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SongTime:%String="",SongName:%String="",SongUrl:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	#dim datum=+$h
+	#dim i,sc
+	s SongTime=##class(%CSP.Page).UnescapeURL(SongTime)
+	s SongName=##class(%CSP.Page).UnescapeURL(SongName)
+	s SongName=$replace(SongName,"^","&")
+	s SongUrl=##class(%CSP.Page).UnescapeURL(SongUrl)
+	s SongUrl=$replace(SongUrl,"^","&")
+	k ^ISdusan
+	try{
+		s sc=1
+		for i=1:1:$l(SongTime,"~")	
+		{
+			s st=$p(SongTime,"~",i)
+			s sn=$p(SongName,"~",i)
+			s su=$p(SongUrl,"~",i)
+			i ##class(DF.MyLinks.Data.FreshFM).iDatumOpen(datum)=""
+			{
+				s obj=##class(DF.MyLinks.Data.FreshFM).%New()	
+				s obj.Datum=datum
+				$$$THROWONERROR(sc,obj.%Save())
+			}
+			k obj
+			i ..iIdOpen(datum,st)=""
+			{
+				s obj=..%New()
+				d obj.ParentRefSetObjectId(datum)
+				s obj.SongName=sn
+				s obj.SongTime=st
+				s obj.PlayerURL=su
+				$$$THROWONERROR(sc,obj.%Save())
+				k obj
+			}
+		}
+	}
+	catch ex
+	{
+		s sc=0
+		s ^ISdusan=ex.DisplayString()
+	}
+	q sc
+]]></Implementation>
+</Method>
+
+<Index name="iId">
+<Properties>ParentRef,SongTime</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.MyLinks.Data.FreshFMsongsD</DataLocation>
+<DefaultData>FreshFMsongsDefaultData</DefaultData>
+<IdLocation>^DF.MyLinks.Data.FreshFMsongsD</IdLocation>
+<IndexLocation>^DF.MyLinks.Data.FreshFMsongsI</IndexLocation>
+<StreamLocation>^DF.MyLinks.Data.FreshFMsongsS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="FreshFMsongsDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>SongName</Value>
+</Value>
+<Value name="3">
+<Value>SongTime</Value>
+</Value>
+<Value name="4">
+<Value>SongURL</Value>
+</Value>
+<Value name="5">
+<Value>PlayerURL</Value>
+</Value>
+<Value name="6">
+<Value>Datum</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

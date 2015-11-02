@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Recepty.eLiquid.ui.Data.Recepty">
+<Super>WEB.Base.CSPPage</Super>
+<TimeCreated>62532,30863.881507</TimeCreated>
+
+<Parameter name="TABLEWIDTH">
+<Default>900</Default>
+</Parameter>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PAGETITLE">
+<Default>Platby</Default>
+</Parameter>
+
+<Parameter name="KVAPKY">
+<Default>20</Default>
+</Parameter>
+
+<Method name="DrawPageContent">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	#dim rs as %ResultSet
+	#dim rs2 as %ScrollableResultSet
+	#dim ostre,strSQL,txt,ret,trNo,recno,recno2,parentId,trID,datum,pId,tData,zaplatene,tTitle=""
+	#dim sc=$$$OK
+	#dim ex as %Exception.AbstractException
+	try
+	{
+		s receptid=$p(%request.Get("receptid",1),"||")
+		&html<
+		<input type="hidden" name="receptid" id="receptid" value="#(receptid)#" />
+		<div class="dialog"></div>>
+		w "<a href="""_..Link("DF.Recepty.eLiquid.ui.Cis.Ciselniky.cls")_""">Číselníky</a><br />",!
+		&html<
+		<table cellpadding="1" cellspacing="1" border="0" style="width:#(..#TABLEWIDTH)#px;">
+		 <caption style="font-family: Arial, Helvetica, sans-serif;font-size: 1.2em;text-decoration: none;font-style: normal;">Receptár liquidov
+		 	<span style="float:right;">
+		 		<ul class="navig">
+					<li><a href="javascript:void(0);">&#35;</a>
+						<ul>
+							<li><a class="new" href="javascript:void(0);">Nový recept</a></li>
+						</ul>
+						<div class="clear"></div>
+					</li>
+				</ul>
+				<div class="clear"></div>
+		 	</span>
+		 </caption>
+		 <tbody>
+		>
+		s strSQL="SELECT id id,Objem objem,Poznamka poznamka,Datum dd,Nazov nazov,PocetDniZretia pdz,0 total FROM DF_Recepty_eLiquid_Data.Recept order by Datum ASC"
+		s rs=##class(%ResultSet).%New()
+		s rs.RuntimeMode=2
+		$$$THROWONERROR(sc,rs.Prepare(strSQL))
+		$$$THROWONERROR(sc,rs.Execute())
+		while rs.Next()
+		{
+			s pId=rs.Data("id")
+			s recno=$i(recno)
+			s trID="tr_"_$replace(rs.Data("dd"),".","")
+			s zaplatene=(receptid=pId)
+			&html<
+				 <tr class="#(trID)#">
+				  <td class="grpSeparator#($s(zaplatene=1:" active",1:""))#" style="width:#(..#TABLEWIDTH)#px;">
+				   <a class="grpName" href="javascript:void(0)">#(rs.Data("nazov"))#</a>
+				   <span style="float:left;padding-left:10px;color:yellow;">&nbsp;#(rs.Data("dd")_" - "_rs.Data("objem"))#</span>
+				   <input type="hidden" value="#(pId)#">
+				   <span style="float:right;">
+				   <ul class="navig submenu">
+					<li><a href="javascript:void(0);">&#35;</a>
+						<ul>
+							<li><a class="newAroma" href="javascript:void(0);">Nová prísada</a></li>
+							<li><a class="delete" href="javascript:void(0);">Vymazať recept</a></li>
+						</ul>
+						<div class="clear"></div>
+					</li>
+				</ul>
+				<div class="clear"></div>
+		 		</span>
+			   </td></tr>>
+				s strSQL="SELECT ObjPrisada->Typ typ,id id,ObjPrisada->Nazov mpart,PocetKvapiek pck,case when ObjPrisada->Typ='0' then PocetKvapiek||' kv.' else PocetKvapiek||' ml.' end pocetkv,ObjPrisada->Vyrobca vyrobca,ObjPrisada->Obchod obchod,Poznamka ppozn FROM DF_Recepty_eLiquid_Data.ReceptPrisady WHERE ReceptRef='"_pId_"' ORDER BY ObjPrisada->Typ DESC,PocetKvapiek DESC"
+				s rs2=##class(%ScrollableResultSet).%New()
+				s rs2.RuntimeMode=1
+				$$$THROWONERROR(sc,rs2.Prepare(strSQL))
+				$$$THROWONERROR(sc,rs2.Execute(pId))
+				i rs2.Count() > 0
+				{
+					w "<tr class=""childs"" style="""_$s(recno'=1:"display:none;",1:"")_"""><td style=""width:890px;border:none;padding:0;""><table cellspacing=""0"" cellpadding=""0"" border=""0"" style=""width:885px;"">",!
+				}
+				s recno2=""
+				while rs2.Next()
+				{
+					s typ=rs2.Data("typ")
+					s recno2=$i(recno2)
+					&html<
+				 <tr class="#($s(rs2.CurrRow#2=0:"even",1:"odd"))#">
+			       <td style="width:15px;background:#FBFBF8;border-bottom:none;border-right:1px dotted lightgray;"><input type="hidden" value="#(rs2.Data("id"))#" />&nbsp;</td>
+			       <td style="width:21px;border-right:1px dotted lightgray;text-align:center">#(recno2)#.</td>
+			       <td style="width:200px;border-right:1px dotted lightgray;">>
+			       	w "<a style=""border:none;"_$s(typ=1:"color:magenta;font-weight:bolder;",1:"")_""" href=""javascript:void(0);"" onclick=""editPrisadaRecord('"_rs2.Data("id")_"');"">"_rs2.Data("mpart")_"</a>"
+			       	w "</td>"
+			       f txt="pocetkv~Objem","vyrobca~Výrobca","obchod~Obchod"
+			       {
+			       	s tData=$p(txt,"~"), tTitle=$p(txt,"~",2)
+			       	s ret=rs2.Data(tData)
+			       	&html<<td class="num" title="#(tTitle)#">#($s(ret="":"&nbsp;",1:ret))#</td>>
+			       }
+			       &html<
+			        <td style="border-right:1px dotted lightgray;text-align:right;">>
+			        i typ'=1
+			        {
+			        	w $fnumber(((rs2.Data("pck")/..#KVAPKY)/+rs.Data("objem"))*100,","),"&nbsp;&#37;"
+			        }
+			        &html<</td></tr>>
+				}
+				i rs2.Count() > 0
+				{
+					w "</table></td></tr>",!
+				}
+				
+		}
+	}
+	catch ex
+	{
+		&html<<tr><td style="width:100%;">#(..noRows(ex.DisplayString()))#</td></tr>>	
+	}	
+	&html<</tbody></table>>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="DrawHeadJavascripts">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	&html<
+	<style>
+	input[type='checkbox'] { padding:0;margin:0;horizontal-align:middle;vertical-align:center;}	
+	
+	</style>
+	<script type="text/javascript" language="javascript">
+	var $a="<a href=\"javascript:void(0);\" style=\"text-decoration: none; cursor: pointer;\">pridať</a>"
+	$(document).ready(function(){
+		$('.navig li').hover(
+		// When mouse enters the .navigation element
+		function () {
+			//Fade in the navigation submenu
+			$('ul', this).fadeIn(); 	// fadeIn will show the sub cat menu
+		}, 
+		// When mouse leaves the .navigation element
+		function () {
+			//Fade out the navigation submenu
+			$('ul', this).fadeOut();	 // fadeOut will hide the sub cat menu		
+		}
+		);
+		$.fn.getContent=function(obj)
+		{
+			var parentId=obj.getAttribute("parentId");
+			var method=obj.getAttribute("method");
+			var objId=obj.getAttribute("objId");
+			if(typeof parentId == "undefined") parentId="";
+			if(typeof objId == "undefined") objId="";
+			var linka=#server(..Link("DF.Recepty.eLiquid.ui.DialogContent.cls?parentId="+parentId+"&objId="+objId+"&method="+method))#;
+			$.get(linka, function(data) {$(obj).html(data)});
+			return;
+		}
+		$dialog=$(".dialog");
+		$dialog.dialog({
+			title: "Pridať recept",
+			autoOpen: false,
+			height: 620,
+			width: 580,
+			modal: true,
+			objId: null,
+			parentId: null,
+			open: function(){
+				$('.ui-state-default').css('float','right');
+				$(this).html('');
+				$(this).getContent(this);},
+			overlay: { backgroundColor: '#000', opacity: 0.5 },			
+			buttons: { "Zavri":  function() { $(this).dialog("close");},
+					   "Ulož":  function() { saveDialog($(this),'1');},
+					   "Vymaž":  function() { saveDialog($(this),'-1');}
+				}
+			});
+		
+		//stiahnut
+		var $a=$(".download");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			var id=$(this).parents("td").find("input[type='hidden']").val();
+			var dtm=$(this).parents("td").children(".grpName").html();
+				$("body").remove("#docdownloadframe1");
+			var datum=prompt('Zadaj dátum splatnosti',dtm);
+				if(datum==null) datum=dtm;
+			var lnk=#server(..Link("DF.Private.ui.GetFile.cls?parentId=" + id +"&datum=" + datum))#;
+			var $iframe=$("<iframe id=\"docdownloadframe1\" style=\"display:none\" src=\"" + lnk + "\"></iframe>");
+			$("body").append($iframe);			
+			return;
+		  });
+		
+		//vymazat
+		var $a=$(".delete");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			  var id=$(this).parents("td").find("input[type='hidden']").val();
+			  if(!confirm("Vymazať recept ?")) return;
+			  var ret=#server(..doDelete(id,"DF.Recepty.eLiquid.Data.Recept"))#;
+			  if(ret!='1')
+			  {
+			  	alert(ret)
+			  }
+			  else
+			  {
+		  	  	$("#receptid").val("");
+		  	  	$("#Form1").submit();
+		  	  }
+		  	  return;
+		  });
+		
+		//zaplatene
+		var $a=$(".newAroma");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			  var parentId=$(this).parents("td.grpSeparator").find("input[type='hidden']").val();
+			  	$dialog.dialog({
+				  	title:'Nová prísada',
+				  	height: 230,
+				  	buttons: { "Zavri":  function() { $(this).dialog("close");},
+					   "Ulož":  function() { saveAromaDialog($(this));}}
+					});
+			  	$dialog.attr({objId:'',parentId:parentId,'method':'aromaNewRecord'});
+				//$dialog.dialog('option',);
+				$dialog.dialog('open');
+			  });
+
+		//skryvanie - /odkryvanie
+		var $a=$(".grpName");
+		$a
+		  .unbind('click')
+		  .bind('click',function(){
+			  var $parent=$(this).parents("tr").next("tr.childs").toggle();
+			  });
+		
+		//novy zaznam
+		$a=$("a.new");
+		$a
+		  .unbind('click')
+		  .bind('click',function(e){
+			  	$dialog.attr({'objId':'','parentId':'','method':'receptNewRecord'});
+				$dialog.dialog('option','title','Nový záznam');
+				$dialog.dialog({buttons: {"Ulož":  function() { saveDialog($(this));}}});
+				$dialog.dialog('open');
+			  });
+		});
+	
+	function showCalendar(toElement)
+	{
+		var	$datepicker=$("#datepicker");
+		$datepicker.datepicker({ altField: toElement,altFormat: "dd.mm.yy" });
+		$datepicker.datepicker("show");
+		return;
+	}
+
+	function editPrisadaRecord(id)	
+	{
+		$dialog.attr({'objId':id,'parentId':id.split('||')[0],'method':'aromaNewRecord'});
+		$dialog.dialog('option','title','Úprava záznamu [\''+id+'\']');
+		$dialog.dialog({buttons: {
+			"Ulož":  function() { saveAromaDialog($(this));},
+			"Vymaž":  function() { deleteAromaDialog($(this));},
+			}});
+		$dialog.dialog('open');
+		return;
+	}
+	
+	function deleteAromaDialog($dlg)
+	{
+		var tId=$dlg.attr('objId');
+		if(!confirm("Vymazať prísadu ?")) return;
+		  var ret=#server(..doDelete(tId,'DF.Recepty.eLiquid.Data.ReceptPrisady'))#;
+		  if(ret!='1')
+		  {
+		  	alert(ret)
+		  }
+		  else
+		  {
+	  	  	$("#receptid").val("");
+	  	  	$("#Form1").submit();
+	  	  }
+		return
+	}
+	
+	function setItems(pId)
+	{
+		var ret=#server(..getPartner(pId))#;
+			$("#tUcet").val(ret.split('~')[0]);
+			$("#tKSymbol").val(ret.split('~')[1]);
+			$("#tVSymbol").val(ret.split('~')[2]);
+			$("#tSSymbol").val(ret.split('~')[3]);
+			$("#tSuma").val(ret.split('~')[4]);
+			$("#tPoznamka").val(ret.split('~')[5]);
+			$("#tExternaURL").val(ret.split('~')[6]);
+			$("#tPlatiDo").val(ret.split('~')[7]);
+		return
+	}
+	
+	function saveAromaDialog($dlg)
+	{
+		var tid=$dlg.attr('objId');
+		var tparentId=$dlg.attr('parentId');
+		var tObjPrisada=$("#tObjPrisada").val();
+		var tPocetKvapiek=$("#tPocetKvapiek").val();
+		var ret=#server(DF.Recepty.eLiquid.ui.DialogContent.saveAromaData(tid,tparentId,tObjPrisada,tPocetKvapiek))#;
+		if(ret!=1)
+		{
+			alert(ret)
+		}
+		else
+		{
+			$dlg.dialog("close");
+			$("#receptid").val(tid);
+		  	$("#Form1").submit();
+		}
+		return;
+	}
+	
+	
+	function saveDialog($dlg,action)
+	{
+		var id=$dlg.attr('objId');
+		if(action=='-1' && id!='')
+		{
+			if(!confirm('Vymazať záznam \''+ id +'\'')) return;
+		}
+		else if(action=='-1' && id=='')
+		{
+			action=1;
+		}
+		var tDatum=$("#tDatum").val();
+		var tNazov=$("#tNazov").val();
+		var tAutor=$("#tAutor").val();
+		var tVlastny=$("#tVlastny").val();
+		var tSuma=$("#tSuma").val();
+		var tObjem=$("#tObjem").val();
+		var tPG=$("#tPG").val();
+		var tVG=$("#tVG").val();
+		var tWater=$("#tWater").val();
+		var tNicotine=$("#tNicotine").val();
+		var tPoznamka=$("#tPoznamka").val();
+		var tDni=$("#PocetDniZretia").val();
+		var ret=#server(DF.Recepty.eLiquid.ui.DialogContent.saveData(id,tDatum,tNazov,tAutor,tVlastny,tSuma,tObjem,tPG,tVG,tWater,tNicotine,tPoznamka,tDni,action))#;
+		if(ret!=1)
+		{
+			alert(ret)
+		}
+		else
+		{
+			$dlg.dialog("close");
+			$("#receptid").val(id);
+		  	$("#Form1").submit();
+
+		}
+		return;
+	}
+	</script>
+	>
+	q
+]]></Implementation>
+</Method>
+
+<Method name="doDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id,cls="DF.Recepty.eLiquid.Data.Recept"</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim ret,sc = 1
+	#dim ex as %Exception.AbstractException
+	try
+	{
+		
+		$$$THROWONERROR(sc,$CLASSMETHOD(cls,"%DeleteId",id))
+	}
+	catch ex
+	{
+		s ret=ex.DisplayString()
+	}
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="getDesc">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Arg1:%String,Arg2:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[	q $s(Arg2="":"<font style=""font-style:italic;color:silver;"">"_Arg1_"</font>",1:Arg2)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

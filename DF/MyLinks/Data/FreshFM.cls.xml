@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.MyLinks.Data.FreshFM">
+<Super>%Persistent</Super>
+<TimeCreated>63855,45136.883437</TimeCreated>
+
+<Property name="Datum">
+<Type>%Date</Type>
+<InitialExpression>+$h</InitialExpression>
+</Property>
+
+<Index name="iDatum">
+<IdKey>1</IdKey>
+<PrimaryKey>1</PrimaryKey>
+<Properties>Datum</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Songs">
+<Type>DF.MyLinks.Data.FreshFMsongs</Type>
+<Cardinality>children</Cardinality>
+<Inverse>ParentRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.MyLinks.Data.FreshFMD</DataLocation>
+<DefaultData>FreshFMDefaultData</DefaultData>
+<IdLocation>^DF.MyLinks.Data.FreshFMD</IdLocation>
+<IndexLocation>^DF.MyLinks.Data.FreshFMI</IndexLocation>
+<StreamLocation>^DF.MyLinks.Data.FreshFMS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="FreshFMDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Datum</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

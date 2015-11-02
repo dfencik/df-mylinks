@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Datatypes.mlORkv">
+<ClassType>datatype</ClassType>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%Numeric</Super>
+<TimeCreated>62901,59439.664388</TimeCreated>
+
+<Parameter name="NOOFDECIMALS">
+<Description>
+Pocet des. miest na zobrazenie</Description>
+<Default>2</Default>
+</Parameter>
+
+<Method name="DisplayToLogical">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>%val:%String</FormalSpec>
+<ReturnType>%Numeric</ReturnType>
+<Implementation><![CDATA[
+	#dim ds = ##class(%SYS.NLS.Format).GetFormatItem("DecimalSeparator")
+	i %val="" q ""
+	s %val=$tr(%val,",",".")
+	q $fn($replace($replace($replace(%val," ml.","")," kv.","")," gr.",""),"O",..#NOOFDECIMALS)
+]]></Implementation>
+</Method>
+
+<Method name="LogicalToDisplay">
+<Description><![CDATA[
+Converts the value of <var>%val</var>, which is in currency format, into a display string.
+<p>Returns the formatted value of <var>%val</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>%val:%Numeric</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim ret=""
+	#dim ds = ##class(%SYS.NLS.Format).GetFormatItem("DecimalSeparator")
+	i %val="" q ""
+	i %val<5.01
+	{
+		s ret=$fn((%val*10),ds,0)_" kv."
+	}
+	else
+	{
+		s ret=$fn(%val,ds,..#NOOFDECIMALS)_" ml."
+	}
+	q ret
+]]></Implementation>
+</Method>
+</Class>
+</Export>

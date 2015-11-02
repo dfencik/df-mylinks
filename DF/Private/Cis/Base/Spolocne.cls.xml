@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Cis.Base.Spolocne">
+<Abstract>1</Abstract>
+<TimeCreated>62530,35272.401824</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="Kod">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Kód"/>
+<Parameter name="MAXLEN" value="15"/>
+</Property>
+
+<Property name="Nazov">
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Názov"/>
+<Parameter name="MAXLEN" value="250"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="Platny">
+<Type>%Boolean</Type>
+<InitialExpression>1</InitialExpression>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Platný"/>
+</Property>
+</Class>
+</Export>

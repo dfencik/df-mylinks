@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="Datatypes.URL">
+<ClassType>datatype</ClassType>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%String</Super>
+<TimeCreated>62901,35665.916576</TimeCreated>
+
+<Method name="DisplayToLogical">
+<Description><![CDATA[
+Converts the input value <var>%val</var>, which is a string, into the logical string format.
+Returns the logical value of the input string <var>%val</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>%val:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim tt,ret
+	s ret=$g(%val),tt=$zcvt(ret,"l")
+	i $p(tt,"http://",2)="",ret'=""
+	{
+		s ret="http://"_ret
+	}
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="LogicalToDisplay">
+<Description><![CDATA[
+Converts the value of <var>%val</var>, which is in logical format, into a display string. Removes all the null characters from the string.
+<p>Returns the string value of <var>%val</var>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>%val:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	q $g(%val)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

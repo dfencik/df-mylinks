@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Data.MainObratyPolozky">
+<Super>%Persistent</Super>
+<TimeCreated>63400,41601.090423</TimeCreated>
+
+<Property name="ObjObraty">
+<Type>DF.Private.Data.MainObraty</Type>
+<Cardinality>parent</Cardinality>
+<Inverse>PolozkyRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="TypZaznamu">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="3"/>
+</Property>
+
+<Property name="CisloUctuPar">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="16"/>
+</Property>
+
+<Property name="CisloUctu">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="16"/>
+</Property>
+
+<Property name="CisloDokladu">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="13"/>
+</Property>
+
+<Property name="Ciastka">
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="KodUctovania">
+<Type>%Integer</Type>
+<Parameter name="DISPLAYLIST" value=",debet,kredit,storno položky debet,storno položky kredit"/>
+<Parameter name="VALUELIST" value=",1,2,4,5"/>
+</Property>
+
+<Property name="VSymbol">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="10"/>
+</Property>
+
+<Property name="KSymbol">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="10"/>
+</Property>
+
+<Property name="SSymbol">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="10"/>
+</Property>
+
+<Property name="Valuta">
+<Type>%Date</Type>
+</Property>
+
+<Property name="DoplnUdaj">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="20"/>
+</Property>
+
+<Property name="ZmenaPolozky">
+<Description>
+Zmena položky v K1 a K2</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1"/>
+</Property>
+
+<Property name="DruhUdajov">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="4"/>
+</Property>
+
+<Property name="DatumSplatnosti">
+<Type>%Date</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>{%%PARENT}("PolozkyRef")</DataLocation>
+<DefaultData>MainObratyPolozkyDefaultData</DefaultData>
+<IdLocation>^DF.Private.Data.MainObratyC("PolozkyRef")</IdLocation>
+<IndexLocation>^DF.PrivateC727.MainObratyPF561I</IndexLocation>
+<StreamLocation>^DF.PrivateC727.MainObratyPF561S</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="MainObratyPolozkyDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>TypZaznamu</Value>
+</Value>
+<Value name="3">
+<Value>CisloUctuPar</Value>
+</Value>
+<Value name="4">
+<Value>CisloUctu</Value>
+</Value>
+<Value name="5">
+<Value>CisloDokladu</Value>
+</Value>
+<Value name="6">
+<Value>Ciastka</Value>
+</Value>
+<Value name="7">
+<Value>KodUctovania</Value>
+</Value>
+<Value name="8">
+<Value>VSymbol</Value>
+</Value>
+<Value name="9">
+<Value>KSymbol</Value>
+</Value>
+<Value name="10">
+<Value>SSymbol</Value>
+</Value>
+<Value name="11">
+<Value>Valuta</Value>
+</Value>
+<Value name="12">
+<Value>DoplnUdaj</Value>
+</Value>
+<Value name="13">
+<Value>ZmenaPolozky</Value>
+</Value>
+<Value name="14">
+<Value>DruhUdajov</Value>
+</Value>
+<Value name="15">
+<Value>DatumSplatnosti</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

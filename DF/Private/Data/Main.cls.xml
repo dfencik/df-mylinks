@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Data.Main">
+<Super>%Persistent</Super>
+<TimeCreated>62530,48828.472041</TimeCreated>
+
+<Property name="Datum">
+<Type>%Date</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Dátum"/>
+</Property>
+
+<Property name="Poznamka">
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Poznámka"/>
+<Parameter name="MAXLEN" value="4000"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="MojUcet">
+<Type>%String</Type>
+<InitialExpression>"SK3702000000002197535154"</InitialExpression>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Môj účet"/>
+</Property>
+
+<Property name="Platny">
+<Type>%Boolean</Type>
+<InitialExpression>1</InitialExpression>
+<Parameter name="CAPTION" value="Platný"/>
+</Property>
+
+<Property name="Zaplatene">
+<Type>%Boolean</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Index name="DatumIndex">
+<Properties>Platny,Datum</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Polozky">
+<Type>DF.Private.Data.MainPolozky</Type>
+<Cardinality>children</Cardinality>
+<Inverse>ParentRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Private.Data.MainD</DataLocation>
+<DefaultData>MainDefaultData</DefaultData>
+<IdLocation>^DF.Private.Data.MainD</IdLocation>
+<IndexLocation>^DF.Private.Data.MainI</IndexLocation>
+<StreamLocation>^DF.Private.Data.MainS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="MainDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Datum</Value>
+</Value>
+<Value name="3">
+<Value>Poznamka</Value>
+</Value>
+<Value name="4">
+<Value>MojUcet</Value>
+</Value>
+<Value name="5">
+<Value>Platny</Value>
+</Value>
+<Value name="6">
+<Value>Zaplatene</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.ui.Data.MainObraty">
+<Super>WEB.Base.CSPPage</Super>
+<TimeCreated>62532,30972.19392</TimeCreated>
+
+<Parameter name="TABLEWIDTH">
+<Default>900</Default>
+</Parameter>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PAGETITLE">
+<Default>Obraty</Default>
+</Parameter>
+
+<Method name="DrawPageContent">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	#dim rs as %ResultSet
+	#dim col,style,a,cols,totalCols,s,cis,strSQL,txt,ret,trNo,recno,recno2,parentId,datum=""
+	#dim sc=$$$OK
+	#dim ex as %Exception.AbstractException
+	try
+	{
+		&html<<div class="dialog"></div>
+				<table cellpadding="1" cellspacing="1" border="0" style="width:#(..#TABLEWIDTH)#px;">
+		 		<caption style="font-family: Arial, Helvetica, sans-serif;font-size: 1.2em;text-decoration: none;font-style: normal;">Obraty</caption>
+		  		>
+		s recno=0
+		s strSQL="SELECT ID, DatumUctovania,DatumZostatku,ObratyDebet,ObratyKredit,StaryZostatok,NovyZostatok, ZnamienkoZostatokNovy,ZnamienkoZostatokStary FROM DF_Private_Data.MainObraty order by DatumZostatku DESC"
+		s rs=##class(%ResultSet).%New()
+		s rs.RuntimeMode=2
+		$$$THROWONERROR(sc,rs.Prepare(strSQL))
+		$$$THROWONERROR(sc,rs.Execute())
+		while rs.Next()
+		{
+			s recno=$i(recno)	
+			&html<
+			<tr class="rowid_#(rs.Data("ID"))#">
+			  <td class="grpSeparator">
+			   <a class="grpName" href="javascript:void(0)" style="text-decoration: none; cursor: pointer;">#(rs.Data("DatumUctovania"))#</a>
+			   <span style="color:white;float:right;">#(rs.Data("ZnamienkoZostatokNovy")_rs.Data("NovyZostatok"))#</span>
+			  </td>
+			 </tr>
+			 <tr class="next">
+			  <td style="display:none;width:#(..#TABLEWIDTH-15)#;text-align:right;padding:0;">
+			 >
+				s strSQL="SELECT ID id,KodUctovania K,DatumSplatnosti,Valuta DatumZauctovania,Ciastka,DoplnUdaj,CisloDokladu FROM DF_Private_Data.MainObratyPolozky where ObjObraty=? order by KodUctovania ASC"
+				k rs2
+				s rs2=##class(%ResultSet).%New()
+				s rs2.RuntimeMode=2
+				$$$THROWONERROR(sc,rs2.Prepare(strSQL))
+				$$$THROWONERROR(sc,rs2.Execute(rs.Data("ID")))
+				&html<<table style="border:none;">>
+				&html<<tr class="header"><td style="border:none;border-right:1px dotted lightgray;">&nbsp;</td>>
+				f a=2:1:rs2.GetColumnCount()
+				{
+					s style=$s(a<rs2.GetColumnCount():"style=""border-top:1px dotted lightgray;border-right:1px dotted lightgray;""",1:"style=""border-top:1px dotted lightgray;""")
+					&html<<td #(style)#>#(rs2.GetColumnHeader(a))#</td>>		
+				}
+				&html<<td style="border-top:1px dotted lightgray;border-right:1px dotted lightgray;">&nbsp;</td></tr>>
+				while rs2.Next()
+				{
+					s recno=$i(recno)
+					s cols="K,DatumZauctovania,DatumSplatnosti,Ciastka,DoplnUdaj,CisloDokladu"
+					s thr=""
+					&html<<tr class="#($s(recno#2=0:"even",1:"odd"))#">
+						<td style="width:15px;background:#FBFBF8;border:none;border-right:1px dotted lightgray;"><input type="hidden" value="#(rs2.Data("id"))#" />&nbsp;</td>>
+					f a=1:1:$l(cols,",")
+					{
+						s col=$p(cols,",",a)
+						i $p(col," ",2)'="" s col=$p(col," ",2)
+						if col="Ciastka"
+						{
+							s thr="text-align:right;"
+						}
+						s style=$s(a<$l(cols,","):"style="""_thr_"border-right:1px dotted lightgray;""",1:"")
+						&html<<td #(style)#>>
+							i col="K"
+							{
+								i rs2.Data(col)="debet"
+								{
+									;w "<span style=""color:red;"">"_rs2.Data(col)_"</span>"
+									w "<img style=""height:15px;width:15px;"" src=""pic/no.jpg"" />"
+								}
+								elseif rs2.Data(col)="kredit"
+								{
+									;w "<span style=""color:green;"">"_rs2.Data(col)_"</span>"
+									w "<img style=""height:15px;width:15px;"" src=""pic/yes.jpg"" />"
+								}
+								else
+								{
+									w rs2.Data(col)
+								}
+							}
+							else
+							{
+								w rs2.Data(col)
+							}
+						&html<</td>>		
+					
+					}
+					&html<<td style="border-right:1px dotted lightgray;">&nbsp;</td></tr>>
+				}
+				;&html<<tr class="header"><td colspan="#($l(cols,",")+2)#">&nbsp;</td></tr>>
+			&html<</table></td></tr>> 
+		}
+		&html<
+		</table>>
+	}
+	catch ex
+	{
+		w ex.DisplayString()		
+	}
+	q
+]]></Implementation>
+</Method>
+
+<Method name="DrawHeadJavascripts">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	
+	&html<<script type="text/javascript" language="javascript">
+	$(document).ready(function(){
+	//skryvanie - /odkryvanie
+		var $a=$(".grpName");
+		$a
+		  .unbind('click')
+		  .bind('click',function(){
+			  var $parent=$(this).parents("tr");
+			  if($parent.next("tr").hasClass("next"))
+			  {
+			  	$parent.next(".next").children("td").toggle();
+			  }
+			  else
+			  {
+			  var trCls=$parent.attr("className");
+			  	$("." + trCls).not($parent).toggle();
+			  }
+			  });
+	})
+	</script>>
+	q
+]]></Implementation>
+</Method>
+</Class>
+</Export>

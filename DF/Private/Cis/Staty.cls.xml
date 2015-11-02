@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Cis.Staty">
+<Super>%Persistent,DF.Private.Cis.Base.Spolocne</Super>
+<TimeCreated>63221,45395.855912</TimeCreated>
+
+<Index name="kodIndex">
+<Properties>Kod</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^DF.Private.Cis.StatyD</DataLocation>
+<DefaultData>StatyDefaultData</DefaultData>
+<IdLocation>^DF.Private.Cis.StatyD</IdLocation>
+<IndexLocation>^DF.Private.Cis.StatyI</IndexLocation>
+<StreamLocation>^DF.Private.Cis.StatyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="StatyDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Kod</Value>
+</Value>
+<Value name="3">
+<Value>Nazov</Value>
+</Value>
+<Value name="4">
+<Value>Platny</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

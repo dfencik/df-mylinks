@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WEB.Util">
+<Abstract>1</Abstract>
+<IncludeCode>mt.includes,%occErrors</IncludeCode>
+<TimeCreated>62530,30265.951418</TimeCreated>
+
+<Method name="DecomposeError">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>sc,esctype="JS",noerr=1</FormalSpec>
+<PublicList>msg,xec,err,lang</PublicList>
+<Implementation><![CDATA[
+    k msg,xec,err
+    i $d(%session) {s lang=%session.Language}
+    else {s lang="sk"}
+    s sql119="SQLCODE=-119"
+    s sql120="SQLCODE=-120"
+    s sql104="SQLCODE=-104"
+    s sql105="SQLCODE=-105"
+    d $System.Status.DecomposeStatus(sc,.err,"",lang)
+    set i=$o(err("")) 
+    set m=0
+    while i'="" {
+        i $f(err(i),sql119)
+        {
+            s err(i)=$replace(err(i),sql119,"Vami zadaný záznam už v databáze existuje.")
+        }
+        elseif $f(err(i),sql120)
+        {
+            s err(i)=$replace(err(i),sql120,"Vami zadaný záznam už v databáze existuje.")
+        }
+        elseif $f(err(i),sql104)
+        {
+            s err(i)=$replace(err(i),sql104,"Zlyhala validácia vlastnosti")
+            s err(i)=$replace(err(i),"%msg=Field","")
+            s err(i)=$replace(err(i),"failed validation","")
+            s err(i)=$replace(err(i),"(value ","(ktorá má hodnotu ")          
+        }
+        elseif $f(err(i),sql105)
+        {
+            s err(i)=$replace(err(i),sql105,"Zlyhala validácia vlastnosti")
+            s err(i)=$replace(err(i),"%msg=Field","")
+            s err(i)=$replace(err(i),"failed validation","")
+            s err(i)=$replace(err(i),"(value ","(ktorá má hodnotu ")          
+        }
+        set msg($i(m))=err(i)
+        if $d(err(i,"embeddederror")) {
+            set j=$o(err(i,"embeddederror",""))
+            while j'="" {
+                s e="err"_i_j
+                s xec="d $System.Status.DecomposeStatus(err("_i_",""embeddederror"","_j_"),."_e_","""",lang)"
+                x xec
+                f ii=1:1:@e s msg($i(m))=@e@(ii)
+                set j=$o(err(i,"embeddederror",j))
+            }
+        }
+        set i=$o(err(i))
+    }
+    try {
+        // timto jsme serializovali vnorene chyby do jedne urovne
+        set out=""
+        set p="*"
+        set i=$o(msg(""))
+        while i'="" {
+            set msg(i)=$p($replace(msg(i),$c(13,10)," "),$c(13,10),1)
+            set eCode=$p($p(msg(i),":",1),"#",2)
+            s:eCode="" eCode="XXXXXX"
+            set skip=0
+            if $$$DTMaxLen_p_$$$DTMinLen_p_$$$DTMaxVal_p_$$$DTMinVal_p_$$$DTValueList_p_$$$DTNotBoolean_p_$$$DTNotNum_p_$$$DTTimeStamp_p_$$$DTPattern[eCode {
+                s classname=0
+                s msg(i)=$p(msg(i),":",2,99)
+                s propname=$p(msg(i),"'",2)
+                i $d(control(eCode,classname,propname)) set skip=1
+                s control(eCode,classname,propname)=""          
+            } elseif $$$DatatypeValidationFailed[eCode {
+                s msg(i)=$p(msg(i),":",2,99)
+                s classname=$p($p(msg(i),"'",2),":",1)
+                s propname=$p($p(msg(i),"'",2),":",2)
+                s prop=##class(%Dictionary.CompiledProperty).%OpenId(classname_"||"_propname)
+                s message=$p(prop.Parameters.GetAt("CAPTION"),";",1)
+                s:message="" message=propname
+                s msg(i)=$p(msg(i),"'",1)_"'"_message_"'"_$p(msg(i),"'",3,99)
+                i $d(control(eCode,classname,propname)) set skip=1
+                s control(eCode,classname,propname)=""
+            } elseif $$$PropertyRequired_p_$$$CollectionPropertyRequired[eCode {
+                s msg(i)=$p(msg(i),":",2,99)
+                s classname=$p($p(msg(i),"'",2),":",1)
+                s propname=$p($p($p(msg(i),"'",2),":",3),"(",1)
+                s prop=##class(%Dictionary.CompiledProperty).%OpenId(classname_"||"_propname)
+                s message=$p(prop.Parameters.GetAt("CAPTION"),";",1)
+                s:message="" message=propname
+                s msg(i)=$p(msg(i),"'",1)_"'"_message_"'"_$p(msg(i),"'",3,99)
+                i $d(control(eCode,classname,propname)) set skip=1
+                s control(eCode,classname,propname)=""
+            } else {
+                s msg(i)=$p(msg(i),":",2,99)            
+            }        
+            set:'skip out=out_$c(13,10)_msg(i)
+            set i=$o(msg(i))
+        }
+    } catch (ex) {
+        s out="UPOZORNENIE: Nastala chyba pri zobrazeni chybovych stavov,"_$C(13,10)
+        s out=out_"prosim kontaktujte spravcu systemu!"_$c(13,10)
+        s i="",tooLong=0
+        f {
+            s i=$o(msg(i))
+            q:(i="")!(tooLong)
+            s out=out_$c(13,10)_msg(i)
+            s:$l(out)>1000 tooLong=1
+        }
+        s:tooLong out=out_$c(13,10)_"Správa bola skrátená z dôvodu veľkej dĺžky..." 
+    }
+    s:$e(out,1,2)=$c(13,10) out=$e(out,3,$l(out))
+    q $s(esctype="JS":out,1:##class(%CSP.Page).EscapeHTML(out))
+]]></Implementation>
+</Method>
+
+<Method name="getObjValue">
+<Description>
+Vráti hodnotu vlastnosti [prop] z inštancie objektu [obj]
+ak je zadaná [objrefprop] predpokladá sa, že [prop] je referencia na objekt
+vracia sa hodnota vlastnosti [objrefprop] referencie [obj].[prop]
+ak je dpconv=0 nerobí sa LogicalToDisplay
+vráti initialValue  ak obj neni objekt
+CURM 04.05.2010 doplnena moznost do objrefprop dat dalsiu kaskadu na objekt
+napr. ObjOsoba.CeleMeno</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>obj,prop,objrefprop="",dpconv=1,quotejs=0,escapehtml=1,initialValue="",lengthToShow="-1",format=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    //CURM 2.10.2009
+    //genialne ozaj...
+    s result=initialValue
+    i $IsObject(obj) 
+    {
+        i objrefprop=""
+        {
+            i prop="%Id"
+            {
+                s result=obj.%Id()
+            }
+            else
+            {
+               	s result=$ZOBJPROPERTY(obj, prop)
+                i dpconv
+                {
+	                if $e(format,1,1)="N",result'=""
+			        {
+			            s result=..FormatNX(result,format)
+			        }
+			        else
+			        {
+		                try
+		                {
+		                    s result=$ZOBJMETHOD(obj,prop_"LogicalToDisplay",result)
+		                }
+		                catch
+		                {
+		                    s result=$ZOBJPROPERTY(obj,prop)
+		                }
+			        }
+                }
+            }
+        }
+        else 
+        {
+            s objref=$ZOBJPROPERTY(obj, prop)
+            i $IsObject(objref) 
+            {
+                f  {
+                    i $p(objrefprop,".",2)="" q
+                    s objref=$ZOBJPROPERTY(objref, $p(objrefprop,".",1))    
+                    s objrefprop=$p(objrefprop,".",2,$l(objrefprop,"."))
+                    i '$IsObject(objref) { q }
+                }
+                
+                i $IsObject(objref) 
+                {
+                    i objrefprop="%Id"
+                    {
+                        s result=objref.%Id()
+                    }
+                    else
+                    {
+                        i dpconv
+                        {
+                            s result=$ZOBJPROPERTY(objref,objrefprop)
+                            if $e(format,1,1)="N",result'=""
+					        {
+					            s result=..FormatNX(result,format)
+					        }
+					        else
+					        {
+	                            try
+	                            {
+	                                s result=$ZOBJMETHOD(objref,objrefprop_"LogicalToDisplay",result)
+	                            }
+	                            catch
+	                            {
+	                                s result=$ZOBJPROPERTY(objref,objrefprop)   
+	                            }
+					        }
+                        }
+                        else
+                        {
+	                        s result=$ZOBJPROPERTY(objref,objrefprop)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /*if format="# 000.00",result'=""
+    {
+        s result=$tr($FNUMBER(result,",",2)," ","")
+    }
+    */
+    
+    i lengthToShow'="-1"
+    {
+        s result=..vExtract(result,lengthToShow)
+    }
+    i escapehtml
+    {
+        s result=##class(%CSP.Page).EscapeHTML(result)  
+    }
+    i quotejs 
+    {
+        s result=##class(%CSP.Page).QuoteJS(result)
+    }
+    
+    //nasl. rjadok opravil FEND 16.6.2011 ,nakolko som nepochopil naco je initialValue
+    i result="",initialValue'="" q initialValue
+    q result
+]]></Implementation>
+</Method>
+
+<Method name="vExtract">
+<Description><![CDATA[
+funkcia vrati orezany retazec [inValue] o dlzke <= [outLength]
+oreze za najblizsou medzerou]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>inValue:%String="",outLength:%Integer="-1",delimiter=" "</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	i $g(delimiter)="" { s delimiter="" }
+	i outLength<1 { q inValue }
+	s result=$p(inValue,delimiter,1)
+	i $l(result)>(2*outLength) { q $e(result,1,(2*outLength)) }
+	i $l(inValue,delimiter)=1 { q result }
+	s i=1
+	f
+	{
+		s i=+i+1
+		i i>$l(inValue,delimiter) { q } 
+
+		s part=$p(inValue,delimiter,i)
+		i part'=""
+		{
+			s part=delimiter_part
+			i $l(result_part)<outLength 
+			{ 
+				s result=result_part
+				continue 
+			}
+			i $l(result_part)=outLength 
+			{ 
+				s result=result_part
+				q 
+			}
+			i $l(result_part)<(2*outLength) 
+			{ 
+				s result=result_part
+				q 
+			}
+			i $l(result_part)>(2*outLength)
+			{
+				s result=$e(result_part,1,outLength*2)
+				q 
+			}
+		}	
+	}
+	q result
+    
+    /*
+    #dim o, i
+    
+    s o=$p(inValue,m,1,$l($e(inValue,1,outLength),m)),i=0
+    while $l(o)> outLength
+    {
+        s o=$p(o,m,1,$l(o,m)-$i(i))
+    }
+    q o
+    */
+]]></Implementation>
+</Method>
+</Class>
+</Export>

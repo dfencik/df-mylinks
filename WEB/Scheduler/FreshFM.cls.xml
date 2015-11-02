@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="WEB.Scheduler.FreshFM">
+<Super>%SYS.Task.Definition</Super>
+<TimeCreated>63855,56964.025288</TimeCreated>
+
+<Method name="OnTask">
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	try
+ 	{
+ 	s httprequest=##class(%Net.HttpRequest).%New() 
+        s httprequest.Server="playlist.flitskikker.com" 
+        d httprequest.Get("/index.php") 
+         s response=httprequest.HttpResponse 
+         s stream=##class(%FileCharacterStream).%New()
+         d stream.CopyFrom(response.Data)
+         d response.%IncrementCount() 
+         d stream.Rewind()
+         s (st,sn,su)=""
+         while 'stream.AtEnd
+         {
+         	
+         	s str=stream.ReadLine()
+         	i $f(str,"<span class=""time"">")
+         	{
+         		s st=st_$p($p(str,"<span class=""time"">",2),"</")_"~"
+         	}
+         	i $f(str,"<h4>")
+         	{
+         		s sn=sn_$p($p(str,">",3),"<")_"~"
+         		s str=stream.ReadLine() 
+         		s su=su_$p($p(str,"href=""",2),""" target")_"~"
+         	}
+         }
+         s sn=$e(sn,1,*-1)
+         s st=$e(st,1,*-1)
+         s su=$e(su,1,*-1)
+         d httprequest.%Close() 
+         s %=##class(DF.MyLinks.Data.FreshFMsongs).SaveSongs(st,sn,su)
+ 	}
+ 	catch
+ 	{
+ 	}
+    q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

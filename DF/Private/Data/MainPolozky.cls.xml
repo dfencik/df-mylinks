@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Private.Data.MainPolozky">
+<Super>%Persistent,DF.Private.Cis.Base.Symboly</Super>
+<TimeCreated>62530,48828.472041</TimeCreated>
+
+<Property name="Poznamka">
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Poznámka"/>
+<Parameter name="MAXLEN" value="350"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="SpravaPre">
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Poznámka"/>
+<Parameter name="MAXLEN" value="35"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="Partner">
+<Type>DF.Private.Cis.Partneri</Type>
+</Property>
+
+<Property name="DatumSplatnosti">
+<Type>%Date</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Dátum splatnosti"/>
+</Property>
+
+<Property name="PlatiDo">
+<Type>%Date</Type>
+<Parameter name="CAPTION" value="Platí do"/>
+</Property>
+
+<Property name="UcetCely">
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Účet"/>
+</Property>
+
+<Property name="Platny">
+<Type>%Boolean</Type>
+<InitialExpression>1</InitialExpression>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Platný"/>
+</Property>
+
+<Property name="ExternaURL">
+<Type>%String</Type>
+<Parameter name="CAPTION" value="PartnerWEB"/>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="ParentRef">
+<Type>DF.Private.Data.Main</Type>
+<Cardinality>parent</Cardinality>
+<Inverse>Polozky</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>{%%PARENT}("Polozky")</DataLocation>
+<DefaultData>MainPolozkyDefaultData</DefaultData>
+<IdLocation>^DF.Private.Data.MainC("Polozky")</IdLocation>
+<IndexLocation>^DF.Private.Data.MainPolozkyI</IndexLocation>
+<StreamLocation>^DF.Private.Data.MainPolozkyS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<Data name="MainPolozkyDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Poznamka</Value>
+</Value>
+<Value name="3">
+<Value>Partner</Value>
+</Value>
+<Value name="4">
+<Value>DatumSplatnosti</Value>
+</Value>
+<Value name="5">
+<Value>Suma</Value>
+</Value>
+<Value name="6">
+<Value>KonstantnySymbol</Value>
+</Value>
+<Value name="7">
+<Value>VariabilnySymbol</Value>
+</Value>
+<Value name="8">
+<Value>SpecifickySymbol</Value>
+</Value>
+<Value name="9">
+<Value>Platny</Value>
+</Value>
+<Value name="10">
+<Value>UcetCely</Value>
+</Value>
+<Value name="11">
+<Value>ExternaURL</Value>
+</Value>
+<Value name="12">
+<Value>SpravaPre</Value>
+</Value>
+<Value name="13">
+<Value>PlatiDo</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+<Class name="DF.Recepty.eLiquid.ui.DialogContent">
+<Super>%CSP.Page</Super>
+<TimeCreated>62531,32397.849241</TimeCreated>
+
+<Parameter name="ENCODED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#dim objId=%request.Get("objId")
+	#dim parentId=%request.Get("parentId")
+	#dim method=%request.Get("method")
+	d $CLASSMETHOD($THIS,method,objId,parentId)
+	q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="saveAromaData">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id,tparentId,tObjPrisada,tPocetKvapiek,action="1"</FormalSpec>
+<Implementation><![CDATA[
+	#dim obj as DF.Recepty.eLiquid.Data.ReceptPrisady
+	#dim ret,sc=1
+	#dim ex as %Exception.AbstractException
+	s sc=$$$OK
+	try
+	{
+		i id=""
+		{
+			s obj=##class(DF.Recepty.eLiquid.Data.ReceptPrisady).%New()
+		}
+		else
+		{
+			s obj=##class(DF.Recepty.eLiquid.Data.ReceptPrisady).%OpenId(id)
+		}
+		i action="-1",id'=""
+		{
+			s obj.Platny=0
+			s ret=1
+		}
+		s obj.PocetKvapiek=obj.PocetKvapiekDisplayToLogical(tPocetKvapiek)
+		d obj.ObjPrisadaSetObjectId(tObjPrisada)
+		i obj.ObjPrisada.Typ=1
+		{
+			s obj.Kvapky=1
+		}
+		else
+		{
+			s obj.Kvapky=0
+		}
+		d obj.ReceptRefSetObjectId(tparentId)
+		$$$THROWONERROR(sc,obj.%Save())
+	}
+	catch ex
+	{
+		s ret=ex.DisplayString()
+	}	
+	k obj
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="aromaNewRecord">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>params...</FormalSpec>
+<Implementation><![CDATA[
+	#dim id=params(1)
+	#dim parentId = $p(params(1),"||")
+	#dim cols = ""
+	#dim i,ii,iii,prop,type,clmn,data,sc,text,par,caption,strSQL,htmlIDs,cls,Cols,vallist,valproperty,displist=""
+	#dim ex as %Exception.AbstractException
+	#dim obj as DF.Recepty.eLiquid.Data.ReceptPrisady
+	#dim rs as %ResultSet
+	try
+	{
+		&html<<table style="width:490px;">
+		<tr><td style="width:90px;">Prísada</td><td>>
+		s obj=""
+		i id'=""
+		{
+			s obj=##class(DF.Recepty.eLiquid.Data.ReceptPrisady).%OpenId(id)
+		}
+		s rs=##class(%ResultSet).%New()
+		i obj=""
+		{
+			s sql="SELECT id id, nazov nazov FROM DF_Recepty_eLiquid_Cis.Prisady where id not in (select ObjPrisada from DF_Recepty_eLiquid_Data.ReceptPrisady where ReceptRef='"_parentId_"') order by nazov ASC"
+			
+		}
+		else
+		{
+			s sql="SELECT id id, nazov nazov FROM DF_Recepty_eLiquid_Cis.Prisady where id in (select ObjPrisada from DF_Recepty_eLiquid_Data.ReceptPrisady where ReceptRef='"_parentId_"') order by nazov ASC"
+		}
+		s sql="SELECT id id, nazov nazov FROM DF_Recepty_eLiquid_Cis.Prisady order by nazov ASC"
+		d rs.Prepare(sql)
+		d rs.Execute()
+		w "<select name=""tObjPrisada"" id=""tObjPrisada"" style=""width:200px;"">",!
+		while rs.Next()
+		{
+			s i=rs.Data("id")
+			s ii=rs.Data("nazov")
+			i obj'="",i=obj.ObjPrisada.%Id()
+			{
+				w "<option value="""_i_""" selected>"_ii_"</option>"
+			}
+			else
+			{
+				w "<option value="""_i_""">"_ii_"</option>"
+			}
+		}
+		w "</select>",!
+		&html<</td>>
+		&html<<tr><td>Počet kvapiek</td><td>
+			<input style="width:60px;" type="text" name="tPocetKvapiek" id="tPocetKvapiek" value="#($s(obj'="":obj.PocetKvapiek,1:""))#" />
+		</td></tr>
+		>
+		k rs,obj
+		&html<</table>
+			<input type="hidden" name="colsToSave" value="ObjPrisada^C~PocetKvapiek^D" />
+			<input type="hidden" name="objId" value="#(id)#" />
+			<input type="hidden" name="parentRef" value="#(parentId)#" />>
+	}
+	catch ex
+	{
+		w ex.DisplayString(),!
+	}
+	q
+]]></Implementation>
+</Method>
+
+<Method name="receptNewRecord">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>params...</FormalSpec>
+<Implementation><![CDATA[
+	#dim id = params(1)
+	#dim parentRef = params(2) 
+	#dim cols,rs = ""
+	#dim i,ii,iii,prop,type,clmn,data,sc,text,par,caption,strSQL,htmlIDs,cls,Cols,vallist,valproperty,displist=""
+	#dim ex as %Exception.AbstractException
+	#dim obj as DF.Recepty.eLiquid.Data.Recept
+	try
+	{
+		k Cols
+		s Cols(0)="DF.Recepty.eLiquid.Data.Recept^Datum~Dátum,Nazov~Názov,Autor,Objem,PG,VG,Water~Voda,Nicotine~Nikotín,PocetDniZretia~Dní,Poznamka~Poznámka"
+		;s Cols(1)="DF.Recepty.eLiquid.Data.ReceptPrisady^ObjPrisada~Prísada,PocetKvapiek~kv(0.3)/ml(10)"
+		&html<<table style="width:490px;">>
+		s i=""
+		f 
+		{
+			s i=$o(Cols(i))
+			q:i=""
+			s htmlIDs(i)=""
+			s cls=$p(Cols(i),"^")
+			s cols=$p(Cols(i),"^",2)
+			i id=""
+			{
+				s obj=$CLASSMETHOD(cls,"%New")
+			}
+			else
+			{
+				s obj=$CLASSMETHOD(cls,"%OpenId",id)
+			}
+			f ii=1:1:$l(cols,",")
+			{
+				s prop=$p(cols,",",ii)
+				s data=$PROPERTY(obj,$p(prop,"~"))
+				s origoData=data
+				try
+				{
+					s data=$METHOD(obj,$p(prop,"~")_"LogicalToDisplay",data)
+				}
+				catch{ s data=$PROPERTY(obj,$p(prop,"~"))}
+				&html<<tr><td style="width:90px;">#($s($p(prop,"~",2)'="":$p(prop,"~",2),1:$p(prop,"~")))#</td><td>>
+				s valproperty=##class(%Dictionary.CompiledProperty).%OpenId(cls_"||"_$p(prop,"~"))
+				i valproperty'=""
+				{
+					s vallist=valproperty.Parameters.GetAt("VALUELIST")
+					s displist=valproperty.Parameters.GetAt("DISPLAYLIST")
+					k valproperty
+					i vallist_displist'=""
+					{
+						&html<<select style="width:395px;" name="t#($p(prop,"~"))#" id="t#($p(prop,"~"))#">>
+						f iii=2:1:$l(vallist,",")
+						{
+							s val=$p(vallist,",",iii)
+							s txt=$p(displist,",",iii)
+							w "<option value="""_txt_""""_$s(val=origoData:" selected=""selected""",1:"")_">"_txt_"</option>"
+						}
+						w "</select>"
+					}
+					else
+					{	
+						&html<
+						<input style="width:395px;" type="text" name="t#($p(prop,"~"))#" id="t#($p(prop,"~"))#" value="#(data)#" />
+						>
+						}
+				}
+				s htmlIDs(i)=htmlIDs(i)_$p(prop,"~")_"^"_%type(1)_"~"
+				&html<</td><td>&nbsp;</td></tr>>
+			}
+		}
+		k rs,obj
+		&html<</table>>
+		s i=""
+		
+		f
+		{
+			s i=$o(htmlIDs(i))
+			q:i=""
+			&html<
+				<input type="hidden" name="colsToSave" value="#($e(htmlIDs(i),1,*-1))#" />
+				<input type="hidden" name="objId" value="#(id)#" />
+			>
+		}
+	}
+	catch ex
+	{
+		w ex.DisplayString(),!
+	}
+	q
+]]></Implementation>
+</Method>
+
+<Method name="cisNewRecord">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>params...</FormalSpec>
+<Implementation><![CDATA[
+	#dim id = params(1)
+	#dim cis= params(2)
+	#dim cols = %request.Get("cols")
+	#dim rs as %ResultSet
+	#dim i,type,clmn,data,sc,text,par,caption,strSQL,htmlIDs=""
+	#dim ex as %Exception.AbstractException
+	#dim obj as DF.Recepty.eLiquid.Cis.Prisady
+	s rs=##class(%ResultSet).%New()
+	s strSQL="select top 1 "
+	s strSQL=strSQL_$replace(cols,"~",",")_" from "_cis
+	try
+	{
+		$$$THROWONERROR(sc,rs.Prepare(strSQL))
+		s obj=##class(DF.Recepty.eLiquid.Cis.Prisady).%New()
+		&html<<table style="width:490px;">>
+		f i=1:1:rs.GetColumnCount()
+		{
+				s clmn=rs.GetColumnName(i)
+				s data=$PROPERTY(obj,clmn)
+				s type=rs.GetColumnType(i)
+				&html<<tr><td style="width:90px;">#(clmn)#</td><td>>
+				s valproperty=##class(%Dictionary.CompiledProperty).%OpenId("DF.Recepty.eLiquid.Cis.Prisady||"_clmn)
+				i valproperty'=""
+				{
+					s vallist=valproperty.Parameters.GetAt("VALUELIST")
+					s displist=valproperty.Parameters.GetAt("DISPLAYLIST")
+					k valproperty
+					i vallist_displist'=""
+					{
+						&html<<select style="width:395px;" name="t#(clmn)#" id="t#(clmn)#">>
+						f iii=2:1:$l(vallist,",")
+						{
+							s val=$p(vallist,",",iii)
+							s txt=$p(displist,",",iii)
+							w "<option value="""_txt_""""_$s(val=data:" selected=""selected""",1:"")_">"_txt_"</option>"
+						}
+						w "</select>"
+					}
+					else
+					{					
+						&html<<input style="width:395px;" type="text" name="t#(clmn)#" id="t#(clmn)#" value="#(data)#" />>
+					}
+				}
+					s htmlIDs=htmlIDs_clmn_"^"_%type(rs.GetColumnType(i))_"~"
+				&html<</td><td>&nbsp;</td><tr>>
+			}
+		k rs,obj
+		&html<</table>
+			<input type="hidden" id="colsToSave" value="#($e(htmlIDs,1,*-1))#" />
+		>
+	}
+	catch ex
+	{
+		w ex.DisplayString(),!
+	}
+	q
+]]></Implementation>
+</Method>
+
+<Method name="cisUpdate">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>params...</FormalSpec>
+<Implementation><![CDATA[
+	#dim id = params(1)
+	#dim cis= params(2)
+	#dim cols = %request.Get("cols")
+	#dim rs as %ResultSet
+	#dim i,type,clmn,data,sc,text,par,caption,strSQL,htmlIDs=""
+	#dim ex as %Exception.AbstractException
+	s rs=##class(%ResultSet).%New()
+	s strSQL="select "
+	s strSQL=strSQL_$replace(cols,"~",",")_" from "_cis_" where id=?"
+	try
+	{
+		$$$THROWONERROR(sc,rs.Prepare(strSQL))
+		$$$THROWONERROR(sc,rs.Execute(id))
+		&html<<table style="width:490px;">>
+		while rs.Next()
+		{
+			f i=1:1:rs.GetColumnCount()
+			{
+				s clmn=rs.GetColumnName(i)
+				i clmn="PlatiDo",rs.Data(clmn)'=""
+				{
+					s data=$zd(rs.Data(clmn))
+				}
+				else
+				{
+					s data=rs.Data(clmn)
+				}
+				
+				&html<<tr><td style="width:90px;">#(clmn)#</td><td>>
+				
+				s type=rs.GetColumnType(i)
+				s valproperty=##class(%Dictionary.CompiledProperty).%OpenId($replace(cis,"_",".")_"||"_clmn)
+				i valproperty'=""
+				{
+					s vallist=valproperty.Parameters.GetAt("VALUELIST")
+					s displist=valproperty.Parameters.GetAt("DISPLAYLIST")
+					k valproperty
+					i vallist_displist'=""
+					{
+						&html<<select style="width:395px;" name="t#(clmn)#" id="t#(clmn)#">>
+						f iii=2:1:$l(vallist,",")
+						{
+							s val=$p(vallist,",",iii)
+							s txt=$p(displist,",",iii)
+							w "<option value="""_txt_""""_$s(val=data:" selected=""selected""",1:"")_">"_txt_"</option>"
+						}
+						w "</select>"
+					}
+					else
+					{					
+						&html<<input style="width:395px;" type="text" name="t#(clmn)#" id="t#(clmn)#" value="#(data)#" />>
+					}
+				}
+				else
+				{			
+				&html<
+				<input style="width:395px;" type="text" name="t#(clmn)#" id="t#(clmn)#" value="#(data)#" />>
+				}
+				s htmlIDs=htmlIDs_clmn_"^"_%type(rs.GetColumnType(i))_"~"
+				&html<</td><td>&nbsp;</td><tr>>
+			}
+		}
+		k rs
+		&html<</table>
+			<input type="hidden" id="colsToSave" value="#($e(htmlIDs,1,*-1))#" />
+		>
+	}
+	catch ex
+	{
+		w ex.DisplayString(),!
+	}
+	q
+]]></Implementation>
+</Method>
+
+<Method name="saveCisData">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objId="",cis="",cols="",data="",action</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim cls = $tr(cis,"_",".")
+	#dim tCols=$lfs(cols,"~")
+	#dim tData=$lfs(data,"~")
+	#dim sc,obj,i,col,isObj,type
+	#dim ex as %Exception.AbstractException
+	s sc=1
+	try
+	{
+		i action=1
+		{
+			s obj=$CLASSMETHOD(cls,$s(objId="":"%New",1:"%OpenId"),objId)
+			f i=1:1:$ll(tCols)
+			{
+				s col=$p($lg(tCols,i),"^")
+				s type=$p($lg(tCols,i),"^",2)
+				i type="O"
+				{
+					d $METHOD(obj,col_"SetObjectId",$lg(tData,i))
+				}
+				else
+				{
+					i type="D"
+					{
+						s $PROPERTY(obj,col)=$METHOD(obj,col_"DisplayToLogical",$lg(tData,i))
+					}
+					else
+					{
+						s $PROPERTY(obj,col)=$lg(tData,i)
+					}
+				}
+			}
+			$$$THROWONERROR(sc,$METHOD(obj,"%Save"))
+		}
+		elseif action="-1"
+		{
+			$$$THROWONERROR(sc,$CLASSMETHOD(cls,"%DeleteId",objId))
+		}
+	}
+	catch ex
+	{
+		s sc=ex.DisplayString()
+	}
+	q sc
+]]></Implementation>
+</Method>
+
+<Method name="dialogContent">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>objId="",parentId</FormalSpec>
+<Implementation><![CDATA[
+	#dim obj as DF.Private.Data.MainPolozky
+	#dim c=$c(13,10)
+	s obj=$CLASSMETHOD("DF.Private.Data.MainPolozky",$s(objId="":"%New",1:"%OpenId"),objId)
+	#dim partner,ucet,ks,vs,ss,suma,pozn,datsplat,ksCombo,pCombo,ExternaURL=""
+	s pCombo=##class(WEB.Components.combobox).DrawCombo("tPartner",##class(WEB.Util).getObjValue(obj,"Partner","%Id",0,,0),"SELECT id ii,MenoPartnera mm FROM DF_Private_Cis.Partneri where Platny=1","ii","mm",""," style=""width:395px;"" onchange=""setItems(this.value);"" ",1,,,,%zaplatene)
+	s partner=pCombo  ;"<input style=""width:390px;"" type=""text"" name=""tPartner"" id=""tPartner"" value="""_obj.Partner.MenoPartnera_""" readonly/>"
+	s ucet=##class(WEB.Util).getObjValue(obj,"UcetCely",,0,,0)
+	s ks=##class(WEB.Util).getObjValue(obj,"KonstantnySymbol","%Id",0,,0)
+	s vs=##class(WEB.Util).getObjValue(obj,"VariabilnySymbol",,0,,0)
+	s ss=##class(WEB.Util).getObjValue(obj,"SpecifickySymbol",,0,,0)
+	s suma=##class(WEB.Util).getObjValue(obj,"Suma",,1,,0)
+	s pozn=##class(WEB.Util).getObjValue(obj,"Poznamka",,0,,0)
+	s sprava=##class(WEB.Util).getObjValue(obj,"SpravaPre",,0,,0)
+	s pObj=##class(DF.Private.Data.Main).%OpenId(parentId)
+	s realDatSplat=##class(WEB.Util).getObjValue(pObj,"Datum",,1,,0)
+	s datsplat=##class(WEB.Util).getObjValue(obj,"DatumSplatnosti",,1,,0,realDatSplat)
+	s platido=##class(WEB.Util).getObjValue(obj,"PlatiDo",,1,,0)
+	s ExternaURL=##class(WEB.Util).getObjValue(obj,"ExternaURL",,0,,0)
+	s ksCombo=##class(WEB.Components.combobox).DrawCombo("tKSymbol",ks,"select id ii,kod||' - '||LEFT(Nazov,45) nn from DF_Private_Cis.kSymboly where Platny=1","ii","nn",""," style=""width:395px;"" ",,,,,%zaplatene)
+	s readonly=$s(%zaplatene:" readonly='readonly' ",1:"")
+	&html<
+		<table style="width:490px;">
+		 <tr><td style="width:90px;border-top:1px dotted lightgray;">Partner:</td><td style="border-top:1px dotted lightgray;width:395px;">#(partner)#</td><td style="border-top:1px dotted lightgray;">&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Účet:</td><td><input#(readonly)# style="width:195px;" type="text" name="tUcet" id="tUcet" value="#(ucet)#" #($select(objId'="":"readonly",1:""))# /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Konšt.symbol:</td><td>#(ksCombo)#</td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Var.symbol:</td><td><input#(readonly)# style="width:195px;text-align:right;" type="text" name="tVSymbol" id="tVSymbol" value="#(vs)#" maxlength="10" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Špec.symbol:</td><td><input#(readonly)# style="width:195px;text-align:right;" type="text" name="tSSymbol" id="tSSymbol" value="#(ss)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Suma:</td><td><input#(readonly)# style="width:95px;text-align:right;" type="text" name="tSuma" id="tSuma" value="#(suma)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Dát.splat.:</td><td><input#(readonly)# style="width:95px;text-align:right;" type="text" name="tDatSplat" id="tDatSplat" value="#(datsplat)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Platí do:</td><td><input#(readonly)# style="width:95px;text-align:right;" type="text" name="tPlatiDo" id="tPlatiDo" value="#(platido)#" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Správa:</td><td><input#(readonly)# style="width:395px;" type="text" name="tSprava" id="tSprava" value="#(sprava)#" maxlength="35" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Poznámka:</td><td><textarea#(readonly)# cols="50" rows="3" name="tPoznamka" id="tPoznamka">#(pozn)#</textarea></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">Uložiť ako partnera:</td><td><input#(readonly)# style="width:395px;" type="text" name="tNewPartner" id="tNewPartner" value="" /></td><td>&nbsp;</td><tr>
+		 <tr><td style="width:90px;">WEB partnera:</td><td><input#(readonly)# style="width:395px;" type="text" name="tExternaURL" id="tExternaURL" value="#(ExternaURL)#" /></td><td>&nbsp;</td><tr>
+		</table>
+	>
+	k obj
+	q
+]]></Implementation>
+</Method>
+
+<Method name="saveData">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id,tDatum,tNazov,tAutor,tVlastny,tSuma,tObjem,tPG,tVG,tWater,tNicotine,tPoznamka,tPocetDniZretia,action</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim obj as DF.Recepty.eLiquid.Data.Recept
+	#dim ret,sc=1
+	#dim ex as %Exception.AbstractException
+	s sc=$$$OK
+	try
+	{
+		i id=""
+		{
+			s obj=##class(DF.Recepty.eLiquid.Data.Recept).%New()
+		}
+		else
+		{
+			s obj=##class(DF.Recepty.eLiquid.Data.Recept).%OpenId(id)
+		}
+		i action="-1",id'=""
+		{
+			s obj.Platny=0
+			s ret=1
+		}
+		s obj.Nazov=obj.NazovDisplayToLogical(tNazov)
+		s obj.Datum=obj.DatumDisplayToLogical(tDatum)
+		s obj.Autor=tAutor
+		s obj.PocetDniZretia=obj.PocetDniZretiaDisplayToLogical(tPocetDniZretia)
+		s obj.Poznamka=obj.PoznamkaDisplayToLogical(tPoznamka)
+		s obj.Objem=obj.ObjemDisplayToLogical(tObjem)
+		s obj.PG=obj.PGDisplayToLogical(tPG)
+		s obj.VG=obj.VGDisplayToLogical(tVG)
+		s obj.Water=obj.WaterDisplayToLogical(tWater)
+		s obj.Nicotine=obj.NicotineDisplayToLogical(tNicotine)
+		$$$THROWONERROR(sc,obj.%Save())
+	}
+	catch ex
+	{
+		s ret=ex.DisplayString()
+	}	
+	k obj
+	q ret
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	s %zaplatene=%request.Get("zaplatene")
+	s %type(1)="C"  ;BINARY 
+	s %type(2)="D"  ;DATE 
+	s %type(3)="D"  ;DOUBLE 
+	s %type(4)="C"  ;HANDLE
+	s %type(5)="D"  ;INTEGER
+	s %type(6)="C"  ;LIST
+	s %type(7)="D"  ;LONGVARCHAR
+	s %type(8)="D"  ;TIME
+	s %type(9)="D"  ;TIMESTAMP
+	s %type(10)="D" ;VARCHAR
+	s %type(11)="D"  ;STATUS
+	s %type(12)="C"  ;BINARYSTREAM
+	s %type(13)="C"  ;CHARACTERSTREAM
+	s %type(14)="D"  ;NUMERIC
+	s %type(15)="D"  ;CURRENCY
+	s %type(16)="C"  ;BOOLEAN
+	s %type(17)="C"  ;OID
+	s %type(18)="D"  ;BIGINT
+	s %type(19)="D"  ;FDATE
+	s %type(20)="D"  ;FTIMESTAMP
+	q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>
