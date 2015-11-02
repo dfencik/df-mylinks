@@ -23,6 +23,28 @@
 <Relationship>1</Relationship>
 </Property>
 
+<Method name="getLatestSongs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cnt=5</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim sc =$$$OK
+	#dim ex
+	try
+	{
+		i cnt>10 s cnt=10
+		i cnt<1 s cnt=5
+		&sql(declare c1 cursor for
+			select top 10 
+		)
+	}
+	catch ex
+	{
+	}
+	q sc
+]]></Implementation>
+</Method>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DataLocation>^DF.MyLinks.Data.FreshFMD</DataLocation>
