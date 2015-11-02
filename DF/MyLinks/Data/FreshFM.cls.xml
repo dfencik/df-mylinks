@@ -23,25 +23,65 @@
 <Relationship>1</Relationship>
 </Property>
 
-<Method name="getLatestSongs">
+<Method name="getLatestsSongs">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>cnt=5</FormalSpec>
+<FormalSpec>cnt=5,datum={$zd($h,3)},cas=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
+	#define qjs(%1) ##class(%CSP.Page).QuoteJS(%1)
+	#define uEnc(%1) ##class(%CSP.Page).EscapeURL(%1)
 	#dim sc =$$$OK
-	#dim ex
+	#dim ex,ret,tRet,pRet,text=""
 	try
 	{
+		i $zstrip(datum,"*CW")="" s datum=$zd($h,3)
+		i $zstrip(cas,"*CW")="" s cas=##class(%Library.Time).LogicalToDisplay($p($h,",",2))
+		s cas=##class(%Library.Time).DisplayToLogical(cas)
+		i cas<3600
+		{
+			s cas1=0
+		}
+		else
+		{
+			s cas1=cas-3600
+		}
+		s cas1=##class(%Library.Time).LogicalToDisplay(cas1)
+		s $p(cas1,":",3)="00"
+		s cas2=##class(%Library.Time).LogicalToDisplay(cas)
+		s $p(cas2,":",3)="00"
 		i cnt>10 s cnt=10
 		i cnt<1 s cnt=5
+		s pRet="[<rrr>]"
+		s tRet=""
+		#SQLcompile select=ODBC
 		&sql(declare c1 cursor for
-			select top 10 
-		)
+			select top 10 SongName,SongTime,PlayerURL FROM  DF_MyLinks_Data.FreshFMsongs 
+				where ParentRef=:datum 
+				and SongTimeTime between cast(:cas1 as time) and cast(:cas2 as time)
+				order by parentref desc, SongTime asc
+			)
+		&sql(open c1)
+		i SQLCODE'=100,SQLCODE'=0
+		{
+			throw ##class(%Exception.SQL).CreateFromSQLCODE(SQLCODE,$g(%msg))
+		}
+		f
+		{
+			n SQLCODE
+			&sql(fetch c1 into :sn,:st,:su)
+			q:SQLCODE
+			s text=$$$qjs(sn)_","_$$$qjs(st)_","_$$$qjs($$$uEnc(su))
+			s tRet=tRet_$replace(pRet,"<rrr>",text)_","
+			
+		}
+		s tRet=$e(tRet,1,*-1)
+		&sql(close c1)
 	}
 	catch ex
 	{
+		s tRet="["_$$$qjs(ex.DisplayString())_"]"
 	}
-	q sc
+	q tRet
 ]]></Implementation>
 </Method>
 
